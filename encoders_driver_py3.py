@@ -29,20 +29,29 @@ def init_line():
     print (ser)
     return ser
 
-def convertHexToString(char):
-    return "\\x" + str(hex(ord(char)))[2:]
+def close_line(ser):
+    ser.close()
 
-def sync(ser):
-  while True:
-    c1 = ser.read(1)
-    c1 = struct.unpack('B',c1)[0]
-    if c1 == 0xff:
-      c2 = ser.read(1)
-      c2 = struct.unpack('B',c2)[0]
-      #print (c2)
-      if c2 == 0x0d:
-        v = ser.read(15)
-        break
+def get_sync(ser):
+    while True:
+        c1 = ser.read(1)
+        if ord(c1) == 0xff:
+            c2 = ser.read(1)
+            if ord(c2) == 0x0d:
+                v = ser.read(15)
+                break
+
+def read_single_packet(debug=True):
+    ser = init_line()
+    get_sync(ser)
+    sync,data = read_packet(ser,debug=debug)
+    close_line(ser)
+    timeAcq = data[0]
+    sensLeft = data[1]
+    sensRight = data[2]
+    posLeft = data[3]
+    posRight = data[4]
+    return sync, timeAcq, sensLeft, sensRight, posLeft, posRight
 
 def read_packet(ser,debug=True):
     sync = True
@@ -64,16 +73,16 @@ def read_packet(ser,debug=True):
       timer += (v[3] << 16)
       timer += (v[4] << 8)
       timer += v[5]
-      sensLeft = v[6]
-      sensRight= v[7]
-      posLeft = v[8] << 8
-      posLeft += v[9]
-      posRight = v[10] << 8
-      posRight += v[11]
-      voltLeft = v[12] << 8
-      voltLeft += v[13]
-      voltRight = v[14] << 8
-      voltRight += v[15]
+      sensLeft = v[7]
+      sensRight= v[6]
+      posLeft = v[10] << 8
+      posLeft += v[11]
+      posRight = v[8] << 8
+      posRight += v[9]
+      voltLeft = v[14] << 8
+      voltLeft += v[15]
+      voltRight = v[12] << 8
+      voltRight += v[13]
       c3 = v[16]
       stc3 = "%2.2X"%(c3)
       data.append(timer)
