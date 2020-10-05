@@ -28,7 +28,7 @@ def convert(tab):
     return three_values
 
 
-def retreive_compass_values():
+def write_compass_values():
     # 0 = /dev/i2c-0 (port I2C0), 1 = /dev/i2c-1 (port I2C1)
     bus = smbus.SMBus(1)
 
@@ -55,6 +55,23 @@ def retreive_compass_values():
         print(three_values)
         time.sleep(dt)
     fichier.close()
+
+
+def read_compass_values():
+    # 0 = /dev/i2c-0 (port I2C0), 1 = /dev/i2c-1 (port I2C1)
+    bus = smbus.SMBus(1)
+
+    # 7 bit address (will be left shifted to add the read write bit)
+    DEVICE_ADDRESS = 0x1e
+    CTRL_REG3 = 0x22
+    OUT_X_L = 0x28  # first data register to read
+
+    # Write a single register
+    # Set continuous-conversion mode to (MD1=0,MD0=0)
+    bus.write_byte_data(DEVICE_ADDRESS, CTRL_REG3, 0b00000000)
+    six_values = bus.read_i2c_block_data(DEVICE_ADDRESS, OUT_X_L, 6)
+    x, y, z = convert(six_values)
+    return x, y, z
 
 
 def read_compass_values():
@@ -108,7 +125,7 @@ def normalize(points, center):
 
 
 if __name__ == "__main__":
-    # retreive_values()
+    # write_compass_values()
     X, Y, Z = read_compass_values()
     points = array([X, Y, Z])
     # display_compass_values(points)
