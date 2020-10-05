@@ -26,4 +26,4 @@ scp /Piquarricau/test.py estellearrc@172.20.22.55:~/Documents/Cours/ENSTA_Bretag
 https://phoenixnap.com/kb/ssh-to-connect-to-remote-server-linux-or-windows
 
 #Détecter le bus I2C
-idcdectect -y o (ou 1)
+i2cdetect -y o (ou 1)
