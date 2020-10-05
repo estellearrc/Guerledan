@@ -70,18 +70,50 @@ def read_values():
     return X, Y, Z
 
 
-def display_values(points):
+def display_values(points, center=array([[0], [0], [0]])):
     fig = figure()
     ax = Axes3D(fig)
     plot3D(ax, points)
     R = eye(3, 3)
     draw_axis3D(ax, 0, 0, 0, R, zoom=50)
+    # draw_axis3D(ax, center[0, 0], center[1, 0], center[2, 0], R, zoom=50)
     show()
+
+
+def computer_ellipse_center(X, Y, Z):
+    minX, minY, minZ = min(X), min(Y), min(Z)
+    maxX, maxY, maxZ = max(X), max(Y), max(Z)
+    center = array(
+        [[(maxX+minX)/2], [(maxY+minY)/2], [(maxZ+minZ)/2]])
+    return center
+
+
+def translate(points, p):
+    return points - p
+
+
+def normalize(points, center):
+    X = points[0, :]
+    Y = points[1, :]
+    Z = points[2, :]
+    xs, ys, zs = center[0, 0], center[1, 0], center[2, 0]
+    minX, minY, minZ = min(X), min(Y), min(Z)
+    maxX, maxY, maxZ = max(X), max(Y), max(Z)
+    a, b, c = (maxX-minX)/2, (maxY-minY)/2, (maxZ-minZ)/2
+    X_sphere = (X - xs)/(a*a) + xs
+    Y_sphere = (Y - ys)/(b*b) + ys
+    Z_sphere = (Z - zs)/(c*c) + zs
+    print(array([X_sphere, Y_sphere, Z_sphere]))
+    return array([X_sphere, Y_sphere, Z_sphere])
 
 
 if __name__ == "__main__":
     # retreive_values()
     X, Y, Z = read_values()
     points = array([X, Y, Z])
-    print(points)
-    display_values(points)
+    # display_values(points)
+    center = computer_ellipse_center(X, Y, Z)
+    points_trans = translate(points, center)
+    # display_values(points_trans, center)
+    points_norm = normalize(points_trans, center)
+    display_values(points_norm, center)
