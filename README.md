@@ -8,7 +8,7 @@ ping 172.20.25.2X
 #Ex : test bateau 14 : ping 172.20.25.214
 
 #Pour se connecter en ssh à la Rasp
-ssh ue32@172.20.20.220
+ssh ue32@172.20.25.220
 
 #Copier un fichier par ssh sur la Rasp à la racine
 scp test.py ue32@172.20.25.220:
@@ -24,3 +24,6 @@ scp /Piquarricau/test.py estellearrc@172.20.22.55:~/Documents/Cours/ENSTA_Bretag
 
 #Si problème de connection en ssh depuis la Rasp sur le PC, voir lien ci-dessous
 https://phoenixnap.com/kb/ssh-to-connect-to-remote-server-linux-or-windows
+
+#Détecter le bus I2C
+idcdectect -y o (ou 1)
