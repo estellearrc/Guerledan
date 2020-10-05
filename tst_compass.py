@@ -32,6 +32,10 @@ def convert(tab):
     return three_values
 
 
+def write(tab):
+    fichier.write("\n"+str(tab[0])+";"+str(tab[1])+";"+str(tab[2])+";")
+
+
 if __name__ == "__main__":
     # 0 = /dev/i2c-0 (port I2C0), 1 = /dev/i2c-1 (port I2C1)
     bus = smbus.SMBus(1)
@@ -54,6 +58,6 @@ if __name__ == "__main__":
         six_values = bus.read_i2c_block_data(DEVICE_ADDRESS, OUT_X_L, 6)
         # print(six_values)
         three_values = convert(six_values)
-        fichier.write("\n"+str(three_values[0])+";"+str(three_values[1])+";"+str(three_values[2])+";")
+        write(three_values)
         time.sleep(dt)
-fichier.close()
+    fichier.close()
