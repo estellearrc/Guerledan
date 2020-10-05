@@ -3,6 +3,7 @@
 import smbus
 import time
 import numpy as np
+from roblib import *
 
 
 def merge(lower_byte, higher_byte):
@@ -31,7 +32,7 @@ def convert(tab):
     """ convert a table of 6 bytes into 3 decimal integers"""
     three_values = [0, 0, 0]
     for i in range(0, 6, 2):
-        two_bytes = merge(six_values[i], six_values[i+1])
+        two_bytes = merge(tab[i], tab[i+1])
         str_two_bytes = str(two_bytes)
         three_values[int(i/2)] = bin2decs(str_two_bytes)
     return three_values
@@ -66,10 +67,24 @@ def retreive_values():
     fichier.close()
 
 
-def display_values():
+def read_values():
+    X = []
+    Y = []
+    Z = []
     fichier = open("data_compass.csv", "r")
-    for line in fichier:
-    fichier.readlines()
+    for elt in fichier.readlines():
+        line = elt.split(";").strip("\n")
+        X.append(line[0])
+        Y.append(line[1])
+        Z.append(line[2])
+    return X,Y,Z
+
+
+def display_values(X,Y,Z):
+    ax = figure()
+    plot3D(ax,X,Y,Z,"blue")
 
 if __name__ == "__main__":
     retreive_values()
+    X,Y,Z = retreive_values()
+
