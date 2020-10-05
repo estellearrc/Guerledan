@@ -6,30 +6,29 @@ import numpy as np
 
 
 def merge(lower_byte, higher_byte):
+    """merge 2 bytes (2*8 bits) to form a 16-bit long binary integer"""
     higher_byte << 8  # 8-bit shift
-    res = lower_byte | higher_byte  # sum of low and high bytes
-    # res = int(str(res), 2)
-    print(res)
+    res = bin(lower_byte | higher_byte)  # sum of low and high bytes
     return res
 
 
 def bin2decs(C):
-    """bin2decs(C): Conversion chaine binaire signee de longueur quelconque -> nombre entier signe"""
-    print(C)
+    """Convert a binary string into a signed decimal integer"""
     if C[0] == "0":
-        # le 1er chiffre est un '0' => le resultat sera positif
+        # if the first character is '0', the result will be positive
         return int(C, 2)
     else:
-        # le 1er chiffre est un '1' => le resultat sera negatif
+        # if the first character is '1', the result will be negative
         return int(C, 2)-(1 << len(C))
 
 
 def convert(tab):
+    """ convert a table of 6 bytes into 3 decimal integers"""
     three_values = [0, 0, 0]
     for i in range(0, 6, 2):
         two_bytes = merge(six_values[i], six_values[i+1])
         str_two_bytes = str(two_bytes)
-        three_values[i/2] = bin2decs(str_two_bytes)
+        three_values[int(i/2)] = bin2decs(str_two_bytes)
     return three_values
 
 
@@ -52,7 +51,7 @@ if __name__ == "__main__":
     dt = 1
     for t in range(1000):
         six_values = bus.read_i2c_block_data(DEVICE_ADDRESS, OUT_X_L, 6)
-        print(six_values)
+        # print(six_values)
         three_values = convert(six_values)
         print(three_values)
         time.sleep(dt)
