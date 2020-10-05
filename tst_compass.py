@@ -28,7 +28,7 @@ def convert(tab):
     return three_values
 
 
-def retreive_values():
+def retreive_compass_values():
     # 0 = /dev/i2c-0 (port I2C0), 1 = /dev/i2c-1 (port I2C1)
     bus = smbus.SMBus(1)
 
@@ -57,7 +57,7 @@ def retreive_values():
     fichier.close()
 
 
-def read_values():
+def read_compass_values():
     X = []
     Y = []
     Z = []
@@ -70,7 +70,7 @@ def read_values():
     return X, Y, Z
 
 
-def display_values(points, center=array([[0], [0], [0]])):
+def display_compass_values(points, center=array([[0], [0], [0]])):
     fig = figure()
     ax = Axes3D(fig)
     plot3D(ax, points)
@@ -109,11 +109,11 @@ def normalize(points, center):
 
 if __name__ == "__main__":
     # retreive_values()
-    X, Y, Z = read_values()
+    X, Y, Z = read_compass_values()
     points = array([X, Y, Z])
-    # display_values(points)
+    # display_compass_values(points)
     center = computer_ellipse_center(X, Y, Z)
     points_trans = translate(points, center)
-    # display_values(points_trans, center)
+    # display_compass_values(points_trans, center)
     points_norm = normalize(points_trans, center)
-    display_values(points_norm, center)
+    display_compass_values(points_norm, center)
