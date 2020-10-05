@@ -60,7 +60,7 @@ def retreive_values():
         # print(six_values)
         three_values = convert(six_values)
         fichier.write(
-            str(three_values[0])+";"+three_values(tab[1])+";"+three_values(tab[2]) + "\n")
+            str(three_values[0])+";"+str(three_values[1])+";"+str(three_values[2]) + "\n")
         print(three_values)
         time.sleep(dt)
     fichier.close()
@@ -68,31 +68,8 @@ def retreive_values():
 
 def display_values():
     fichier = open("data_compass.csv", "r")
-
+    for line in fichier:
+    fichier.readlines()
 
 if __name__ == "__main__":
-    # 0 = /dev/i2c-0 (port I2C0), 1 = /dev/i2c-1 (port I2C1)
-    bus = smbus.SMBus(1)
-
-    # 7 bit address (will be left shifted to add the read write bit)
-    DEVICE_ADDRESS = 0x1e
-    CTRL_REG3 = 0x22
-    OUT_X_L = 0x28  # first data register to read
-
-    # Write a single register
-    # Set continuous-conversion mode to (MD1=0,MD0=0)
-    bus.write_byte_data(DEVICE_ADDRESS, CTRL_REG3, 0b00000000)
-
-    # Read an array of registers
-    six_values = [0xff, 0xff, 0xff, 0xff, 0xff, 0xff]
-    three_values = [0, 0, 0]
-    dt = 1
-    fichier = open("data_compass.csv", "w")
-    for t in range(20):
-        six_values = bus.read_i2c_block_data(DEVICE_ADDRESS, OUT_X_L, 6)
-        # print(six_values)
-        three_values = convert(six_values)
-        write(three_values)
-        print(three_values)
-        time.sleep(dt)
-    fichier.close()
+    retreive_values()
