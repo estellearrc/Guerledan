@@ -16,8 +16,8 @@ def merge(lower_byte, higher_byte):
 
 def bin2decs(C):
     """Convert a binary string into a signed decimal integer"""
-    # print(len(C))
-    if C[2] == '0':
+    C = C[2:]
+    if C[0] == '0':
         # if the first character is '0', the result will be positive
         # print(int(C, 2))
         return int(C, 2)
