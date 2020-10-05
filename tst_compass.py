@@ -1,31 +1,22 @@
 #!/usr/bin/python
 
-import smbus
+# import smbus
 import time
 import numpy as np
 from roblib import *
 
 
-def merge(lower_byte, higher_byte):
+def merge(lower_byte, upper_byte):
     """merge 2 bytes (2*8 bits) to form a 16-bit long binary integer"""
-    higher_byte << 8  # 8-bit shift
-    res = bin(lower_byte | higher_byte)  # sum of low and high bytes
-    # print(lower_byte | higher_byte)
-    # print(bin(lower_byte | higher_byte))
+    res = lower_byte + upper_byte*256
     return res
 
 
-def bin2decs(C):
+def bin2decs(x):
     """Convert a binary string into a signed decimal integer"""
-    C = C[2:]
-    if C[0] == '0':
-        # if the first character is '0', the result will be positive
-        # print(int(C, 2))
-        return int(C, 2)
-    else:
-        # if the first character is '1', the result will be negative
-        # print(int(C, 2)-(1 << len(C)))
-        return int(C, 2)-(1 << len(C))
+    if x > 32767:
+        x = x - 65536
+    return x
 
 
 def convert(tab):
@@ -33,8 +24,7 @@ def convert(tab):
     three_values = [0, 0, 0]
     for i in range(0, 6, 2):
         two_bytes = merge(tab[i], tab[i+1])
-        str_two_bytes = str(two_bytes)
-        three_values[int(i/2)] = bin2decs(str_two_bytes)
+        three_values[int(i/2)] = bin2decs(two_bytes)
     return three_values
 
 
@@ -54,9 +44,9 @@ def retreive_values():
     # Read an array of registers
     six_values = [0xff, 0xff, 0xff, 0xff, 0xff, 0xff]
     three_values = [0, 0, 0]
-    dt = 1
+    dt = 0.1
     fichier = open("data_compass.csv", "w")
-    for t in range(20):
+    for t in range(1000):
         six_values = bus.read_i2c_block_data(DEVICE_ADDRESS, OUT_X_L, 6)
         # print(six_values)
         three_values = convert(six_values)
@@ -73,18 +63,25 @@ def read_values():
     Z = []
     fichier = open("data_compass.csv", "r")
     for elt in fichier.readlines():
-        line = elt.split(";").strip("\n")
-        X.append(line[0])
-        Y.append(line[1])
-        Z.append(line[2])
-    return X,Y,Z
+        line = elt.strip("\n").split(";")
+        X.append(int(line[0]))
+        Y.append(int(line[1]))
+        Z.append(int(line[2]))
+    return X, Y, Z
 
 
-def display_values(X,Y,Z):
-    ax = figure()
-    plot3D(ax,X,Y,Z,"blue")
+def display_values(points):
+    fig = figure()
+    ax = Axes3D(fig)
+    plot3D(ax, points)
+    R = eye(3, 3)
+    draw_axis3D(ax, 0, 0, 0, R, zoom=50)
+    show()
+
 
 if __name__ == "__main__":
-    retreive_values()
-    X,Y,Z = retreive_values()
-
+    # retreive_values()
+    X, Y, Z = read_values()
+    points = array([X, Y, Z])
+    print(points)
+    display_values(points)
