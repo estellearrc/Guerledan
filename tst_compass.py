@@ -49,9 +49,11 @@ if __name__ == "__main__":
     six_values = [0xff, 0xff, 0xff, 0xff, 0xff, 0xff]
     three_values = [0, 0, 0]
     dt = 1
+    fichier = open("data_compass.csv", "w")
     for t in range(1000):
         six_values = bus.read_i2c_block_data(DEVICE_ADDRESS, OUT_X_L, 6)
         # print(six_values)
         three_values = convert(six_values)
-        print(three_values)
+        fichier.write("\n"+str(three_values[0])+";"+str(three_values[1])+";"+str(three_values[2])+";")
         time.sleep(dt)
+fichier.close()
