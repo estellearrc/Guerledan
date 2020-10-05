@@ -100,6 +100,8 @@ def display_compass_values(points, center=array([[0], [0], [0]])):
 def computer_ellipse_center(X, Y, Z):
     minX, minY, minZ = min(X), min(Y), min(Z)
     maxX, maxY, maxZ = max(X), max(Y), max(Z)
+    print([minX, minY, minZ])
+    print([maxX, maxY, maxZ])
     center = array(
         [[(maxX+minX)/2], [(maxY+minY)/2], [(maxZ+minZ)/2]])
     return center
@@ -109,18 +111,22 @@ def translate(points, p):
     return points - p
 
 
-def normalize(points, center):
+def normalize(points):
     X = points[0, :]
     Y = points[1, :]
     Z = points[2, :]
-    xs, ys, zs = center[0, 0], center[1, 0], center[2, 0]
     minX, minY, minZ = min(X), min(Y), min(Z)
     maxX, maxY, maxZ = max(X), max(Y), max(Z)
+    print([minX, minY, minZ])
+    print([maxX, maxY, maxZ])
     a, b, c = (maxX-minX)/2, (maxY-minY)/2, (maxZ-minZ)/2
-    X_sphere = (X - xs)/(a*a) + xs
-    Y_sphere = (Y - ys)/(b*b) + ys
-    Z_sphere = (Z - zs)/(c*c) + zs
-    print(array([X_sphere, Y_sphere, Z_sphere]))
+    X_sphere = 3000*X/a
+    Y_sphere = 3000*Y/b
+    Z_sphere = 3000*Z/c
+    minX, minY, minZ = min(X_sphere), min(Y_sphere), min(Z_sphere)
+    maxX, maxY, maxZ = max(X_sphere), max(Y_sphere), max(Z_sphere)
+    print([minX, minY, minZ])
+    print([maxX, maxY, maxZ])
     return array([X_sphere, Y_sphere, Z_sphere])
 
 
@@ -131,6 +137,6 @@ if __name__ == "__main__":
     # display_compass_values(points)
     center = computer_ellipse_center(X, Y, Z)
     points_trans = translate(points, center)
-    # display_compass_values(points_trans, center)
-    points_norm = normalize(points_trans, center)
+    display_compass_values(points_trans, center)
+    points_norm = normalize(points_trans)
     display_compass_values(points_norm, center)
