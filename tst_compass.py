@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
-import smbus
+# import smbus
 import time
 import numpy as np
-#from roblib import *
+from roblib import *
 
 
 def merge(lower_byte, upper_byte):
@@ -155,8 +155,29 @@ def test():
     print("Bx = %d G, By = %d G, Bz = %d G", x, y, z)
     time.sleep(1)
 
+
+def correct_manually(Bx, By, Bz):
+    # A and b have been obtained with
+    b = np.array([[-261], [2105], [-1350]])
+    A = np.array(
+        [[-6789, 926, -402], [-680, -3446, -1742], [5326, 3904, 11426]])
+    B = np.array([Bx, By, Bz])
+    # print(B)
+    B_corrected = np.linalg.pinv(A).dot(B + b)
+    return B_corrected
+
+
+def calibrate_manually():
+    # second way to calibrate the boussole, doesn't work... the ellipsoid is even more ellipsoid than before...
+    Bx, By, Bz = read_compass_values()
+    points = correct_manually(Bx, By, Bz)
+    display_compass_values(points)
+
+
 if __name__ == "__main__":
-    # calibrate()
-    #retrieve_compass_values()
-    while(1):
-        test()
+    calibrate()
+    # retrieve_compass_values()
+    # calibrate_manually()
+    # retrieve_compass_values()
+    # while(1):
+    #     test()
