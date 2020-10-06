@@ -26,7 +26,7 @@ def compute_command(e):
 
 def compute_velocity_reg(e,u):
     """
-    Attention manque la consersion increment/vitesse
+    Attention manque la conversion increment/vitesse
     Motor regulated by velocity
     """
     err_velocity = np.array([[0],[0]])
@@ -102,5 +102,5 @@ def motor_com(cap0):
 
 
 if __name__ == "__main__":
-    cap0 = np.pi/2  # North heading in degrees
+    cap0 = 0  # North heading in degrees
     motor_com(cap0)
