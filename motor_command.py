@@ -9,13 +9,11 @@ import tst_compass as cmps
 
 
 def sawtooth(x):
-    return (x+pi) % (2*pi)-pi   # or equivalently   2*arctan(tan(x/2))
+    return (x+np.pi) % (2*np.pi)-np.pi   # or equivalently   2*arctan(tan(x/2))
 
 
-def compute_command():
-    y0 = 0
-    x, y, z = cmps.read_compass_values()
-    e = y-y0
+def compute_command(cap, cap0):
+    e = cap-cap0
     M = np.array([1, -1], [1, 1])
     b = np.array([[sawtooth(e)], [1]])
     M_1 = np.linalg.pinv(M)
@@ -36,10 +34,13 @@ if __name__ == "__main__":
     print("... done")
 
     # test simple sur les moteurs
+    y0 = 0
+    x, y, z = cmps.read_compass_values()
+    u = compute_command(y, y0)
     cmdl = u[0, 0]
     cmdr = u[1, 0]
     if y > 0:
-        cmdl = 40 #angle velocity
+        cmdl = 40  # angle velocity
         cmdr = 0
         print("set motors to L=%d R=%d ..." % (cmdl, cmdr))
         ardudrv.send_arduino_cmd_motor(serial_arduino, cmdl, cmdr)
