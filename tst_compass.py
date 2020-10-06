@@ -57,7 +57,7 @@ def write_compass_values():
     fichier.close()
 
 
-def read_compass_values():
+def retrieve_compass_values():
     # 0 = /dev/i2c-0 (port I2C0), 1 = /dev/i2c-1 (port I2C1)
     bus = smbus.SMBus(1)
 
@@ -71,7 +71,11 @@ def read_compass_values():
     bus.write_byte_data(DEVICE_ADDRESS, CTRL_REG3, 0b00000000)
     six_values = bus.read_i2c_block_data(DEVICE_ADDRESS, OUT_X_L, 6)
     x, y, z = convert(six_values)
-    return x, y, z
+    point = np.array([x, y, z])
+    center = np.array([[413.], [-2209.], [3626.5]])
+    point_trans = translate(point, center)
+    point_norm = normalize(point_trans)
+    return point_norm
 
 
 def read_compass_values():
@@ -87,7 +91,7 @@ def read_compass_values():
     return X, Y, Z
 
 
-def display_compass_values(points, center=array([[0], [0], [0]])):
+def display_compass_values(points, center=np.array([[0], [0], [0]])):
     fig = figure()
     ax = Axes3D(fig)
     plot3D(ax, points)
@@ -102,7 +106,7 @@ def computer_ellipse_center(X, Y, Z):
     maxX, maxY, maxZ = max(X), max(Y), max(Z)
     print([minX, minY, minZ])
     print([maxX, maxY, maxZ])
-    center = array(
+    center = np.array(
         [[(maxX+minX)/2], [(maxY+minY)/2], [(maxZ+minZ)/2]])
     return center
 
@@ -127,16 +131,21 @@ def normalize(points):
     maxX, maxY, maxZ = max(X_sphere), max(Y_sphere), max(Z_sphere)
     print([minX, minY, minZ])
     print([maxX, maxY, maxZ])
-    return array([X_sphere, Y_sphere, Z_sphere])
+    return np.array([X_sphere, Y_sphere, Z_sphere])
 
 
-if __name__ == "__main__":
-    # write_compass_values()
+def calibrate():
+    write_compass_values()
     X, Y, Z = read_compass_values()
-    points = array([X, Y, Z])
+    points = np.array([X, Y, Z])
     # display_compass_values(points)
     center = computer_ellipse_center(X, Y, Z)
     points_trans = translate(points, center)
-    display_compass_values(points_trans, center)
+    # display_compass_values(points_trans, center)
     points_norm = normalize(points_trans)
     display_compass_values(points_norm, center)
+
+
+if __name__ == "__main__":
+    # calibrate()
+    retrieve_compass_values()

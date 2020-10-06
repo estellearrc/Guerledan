@@ -35,7 +35,8 @@ if __name__ == "__main__":
 
     # test simple sur les moteurs
     y0 = 0
-    x, y, z = cmps.read_compass_values()
+    coord = cmps.read_compass_values()
+    x, y, z = coord[0, 0], coord[1, 0], coord[2, 0]
     u = compute_command(y, y0)
     cmdl = u[0, 0]
     cmdr = u[1, 0]
