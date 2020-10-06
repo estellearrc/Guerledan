@@ -10,7 +10,7 @@ import tst_compass as cmps
 
 def sawtooth(x):
     # x in radians
-    return (x*np.pi/180 + np.pi) % (2*np.pi)-np.pi
+    return (x + np.pi) % (2*np.pi)-np.pi
 
 
 def compute_command(e):
@@ -24,7 +24,7 @@ def compute_command(e):
 
 
 def compute_heading(Bx, By):
-    return np.arctan2(By, Bx)*180/np.pi
+    return np.arctan2(By, Bx)
 
 
 if __name__ == "__main__":
@@ -40,7 +40,7 @@ if __name__ == "__main__":
     print("... done")
 
     # motor regulation to follow a given heading
-    cap0 = 64  # North heading in degrees
+    cap0 = np.pi/2  # North heading in degrees
     coef_left_motor = 1.75
     while(1):
         Bx, By, Bz = cmps.retrieve_compass_values()  # retrieve brut values
@@ -50,7 +50,7 @@ if __name__ == "__main__":
         Bx, By, Bz = coord[0, 0], coord[1, 0], coord[2, 0]
         cap = compute_heading(Bx, By)  # compute the wanted heading
         print("cap = ", cap)
-        e = cap-cap0  # error of heading
+        e = cap0-cap  # error of heading
 
         u = compute_command(e)
         cmdl = coef_left_motor*u[1, 0]  # command left motor
@@ -64,15 +64,3 @@ if __name__ == "__main__":
         data_arduino = ardudrv.get_arduino_decode_cmd(serial_arduino, timeout)
         print("data:", data_arduino[0:-1])
         print("... done")
-
-    # print("set motors to L=0 R=0 ...")
-    # cmdl = 0
-    # cmdr = 0
-    # ardudrv.send_arduino_cmd_motor(serial_arduino, cmdl, cmdr)
-    # print("... done")
-
-    # print("get decoded data (debug) ...")
-    # timeout = 1.0
-    # data_arduino = ardudrv.get_arduino_decode_cmd(serial_arduino, timeout)
-    # print("data:", data_arduino[0:-1])
-    # print("... done")
