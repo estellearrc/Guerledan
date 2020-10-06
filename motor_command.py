@@ -107,4 +107,4 @@ def motor_com(cap0):
 
 if __name__ == "__main__":
     cap0 = 0  # North heading in degrees
-    motor_com(cap0)
+    # motor_com(cap0)
