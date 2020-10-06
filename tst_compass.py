@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# import smbus
+import smbus
 import time
 import numpy as np
 #from roblib import *
@@ -52,7 +52,7 @@ def write_compass_values():
         three_values = convert(six_values)
         fichier.write(
             str(three_values[0])+";"+str(three_values[1])+";"+str(three_values[2]) + "\n")
-        print(three_values)
+        #print(three_values)
         time.sleep(dt)
     fichier.close()
 
@@ -104,8 +104,8 @@ def display_compass_values(points, center=np.array([[0], [0], [0]])):
 def computer_ellipse_center(X, Y, Z):
     minX, minY, minZ = min(X), min(Y), min(Z)
     maxX, maxY, maxZ = max(X), max(Y), max(Z)
-    print([minX, minY, minZ])
-    print([maxX, maxY, maxZ])
+    #print([minX, minY, minZ])
+    #print([maxX, maxY, maxZ])
     center = np.array(
         [[(maxX+minX)/2], [(maxY+minY)/2], [(maxZ+minZ)/2]])
     return center
@@ -121,16 +121,16 @@ def normalize(points):
     Z = points[2, :]
     minX, minY, minZ = min(X), min(Y), min(Z)
     maxX, maxY, maxZ = max(X), max(Y), max(Z)
-    print([minX, minY, minZ])
-    print([maxX, maxY, maxZ])
+    #print([minX, minY, minZ])
+    #print([maxX, maxY, maxZ])
     a, b, c = (maxX-minX)/2, (maxY-minY)/2, (maxZ-minZ)/2
     X_sphere = 3000*X/a
     Y_sphere = 3000*Y/b
     Z_sphere = 3000*Z/c
     minX, minY, minZ = min(X_sphere), min(Y_sphere), min(Z_sphere)
     maxX, maxY, maxZ = max(X_sphere), max(Y_sphere), max(Z_sphere)
-    print([minX, minY, minZ])
-    print([maxX, maxY, maxZ])
+    #print([minX, minY, minZ])
+    #print([maxX, maxY, maxZ])
     return np.array([X_sphere, Y_sphere, Z_sphere])
 
 

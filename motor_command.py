@@ -14,7 +14,7 @@ def sawtooth(x):
 
 def compute_command(cap, cap0):
     e = cap-cap0  # erreur
-    M = np.array([1, -1], [1, 1])
+    M = np.array([[1, -1], [1, 1]])
     b = np.array([[sawtooth(e)], [1]])
     M_1 = np.linalg.pinv(M)  # resolution of the system
     u = M_1*b  # command motor array
@@ -35,7 +35,8 @@ if __name__ == "__main__":
 
     # test simple sur les moteurs
     y0 = 0
-    coord = cmps.read_compass_values()
+    coord = cmps.retrieve_compass_values()
+    print(coord)
     x, y, z = coord[0, 0], coord[1, 0], coord[2, 0]
     u = compute_command(y, y0)
     cmdl = u[0, 0]  # left ou right ?
