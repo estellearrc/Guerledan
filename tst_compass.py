@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-#import smbus
+# import smbus
 import time
 import numpy as np
 from roblib import *
@@ -29,6 +29,10 @@ def convert(tab):
 
 
 def write_compass_values():
+    """
+    CALIBRATION
+    Write all magnetic values retrieved for calibration into a CSV file
+    """
     # 0 = /dev/i2c-0 (port I2C0), 1 = /dev/i2c-1 (port I2C1)
     bus = smbus.SMBus(1)
 
@@ -58,6 +62,9 @@ def write_compass_values():
 
 
 def retrieve_compass_values():
+    """
+    Read the current value of the magnetic field on the compass
+    """
     # 0 = /dev/i2c-0 (port I2C0), 1 = /dev/i2c-1 (port I2C1)
     bus = smbus.SMBus(1)
 
@@ -75,14 +82,21 @@ def retrieve_compass_values():
 
 
 def tranform_compass_data(x, y, z):
+    """
+    correct one point to fit a sphere instead of an ellipsoid
+    """
     point = np.array([x, y, z])
-    center = np.array([[334.], [-2022.], [3758.]]) #358,-2237,3614 /334,-2022,3758
+    center = np.array([[334.], [-2022.], [3758.]])
     point_trans = translate(point, center)
-    point_norm = normalize(point_trans)
+    point_norm = normalize_1_point(point_trans)
     return point_norm
 
 
 def read_compass_values():
+    """
+    CALIBRATION
+    read the file of magnetic values for compass calibration
+    """
     X = []
     Y = []
     Z = []
@@ -96,50 +110,82 @@ def read_compass_values():
 
 
 def display_compass_values(points, center=np.array([[0], [0], [0]])):
+    """
+    Display in a 3d figure the compass values (display ellipsoid or sphere)
+    """
     fig = figure()
     ax = Axes3D(fig)
     plot3D(ax, points)
     R = eye(3, 3)
     draw_axis3D(ax, 0, 0, 0, R, zoom=50)
-    # draw_axis3D(ax, center[0, 0], center[1, 0], center[2, 0], R, zoom=50)
+    draw_axis3D(ax, center[0, 0], center[1, 0], center[2, 0], R, zoom=50)
     show()
 
 
 def computer_ellipse_center(X, Y, Z):
+    """
+    CALIBRATION
+    Compute the center of the ellipsoid
+    """
     minX, minY, minZ = min(X), min(Y), min(Z)
     maxX, maxY, maxZ = max(X), max(Y), max(Z)
-    #print([minX, minY, minZ])
-    #print([maxX, maxY, maxZ])
     center = np.array(
         [[(maxX+minX)/2], [(maxY+minY)/2], [(maxZ+minZ)/2]])
     return center
 
 
 def translate(points, p):
+    """
+    CALIBRATION OR NOT
+    translate all points of the vector p
+    """
     return points - p
 
 
+def normalize_1_point(point):
+    """
+    Normalize one point to match the coordinates of a sphere.
+    Transform the ellipsoid into a sphere
+    """
+    x, y, z = point[0, 0], point[1, 0], point[2, 0]
+    minX, minY, minZ = -3292.0, -3004.0, -3198.5
+    maxX, maxY, maxZ = 3292.0, 3004.0, 3198.5
+    a, b, c = (maxX-minX)/2, (maxY-minY)/2, (maxZ-minZ)/2
+    x_sphere = 3000*x/a
+    y_sphere = 3000*y/b
+    z_sphere = 3000*z/c
+    return np.array([x_sphere, y_sphere, z_sphere])
+
+
 def normalize(points):
+    """
+    CALIBRATION
+    Normalize all points to match the coordinates of a sphere.
+    Transform the ellipsoid into a sphere
+    """
     X = points[0, :]
     Y = points[1, :]
     Z = points[2, :]
     minX, minY, minZ = min(X), min(Y), min(Z)
     maxX, maxY, maxZ = max(X), max(Y), max(Z)
-    #print([minX, minY, minZ])
-    #print([maxX, maxY, maxZ])
+    print([minX, minY, minZ])
+    print([maxX, maxY, maxZ])
     a, b, c = (maxX-minX)/2, (maxY-minY)/2, (maxZ-minZ)/2
     X_sphere = 3000*X/a
     Y_sphere = 3000*Y/b
     Z_sphere = 3000*Z/c
     minX, minY, minZ = min(X_sphere), min(Y_sphere), min(Z_sphere)
     maxX, maxY, maxZ = max(X_sphere), max(Y_sphere), max(Z_sphere)
-    #print([minX, minY, minZ])
-    #print([maxX, maxY, maxZ])
+    # print([minX, minY, minZ])
+    # print([maxX, maxY, maxZ])
     return np.array([X_sphere, Y_sphere, Z_sphere])
 
 
 def calibrate():
-    #write_compass_values()
+    """
+    CALIBRATION
+    """
+    # write_compass_values()
     X, Y, Z = read_compass_values()
     points = np.array([X, Y, Z])
     # display_compass_values(points)
@@ -147,18 +193,25 @@ def calibrate():
     print(center)
     points_trans = translate(points, center)
     # display_compass_values(points_trans, center)
+
     points_norm = normalize(points_trans)
     display_compass_values(points_norm, center)
 
 
 def test():
+    """
+    Display the values of the magnetic field into the terminal
+    """
     x, y, z = retrieve_compass_values()
     print("Bx = %d G, By = %d G, Bz = %d G", x, y, z)
     time.sleep(1)
 
 
 def correct_manually(Bx, By, Bz):
-    # A and b have been obtained with
+    """
+    CALIBRATION
+    Compute the center of the ellipsoid and apply the sphere deformation with values found experimentally (b, A)
+    """
     b = np.array([[-261], [2105], [-1350]])
     A = np.array(
         [[-6789, 926, -402], [-680, -3446, -1742], [5326, 3904, 11426]])
@@ -169,7 +222,11 @@ def correct_manually(Bx, By, Bz):
 
 
 def calibrate_manually():
-    # second way to calibrate the boussole, doesn't work... the ellipsoid is even more ellipsoid than before...
+    """
+    CALIBRATION
+    Calibrate with values (b,A) found experimentally (inclination)
+    """
+    # second way to calibrate the compass, doesn't work... the ellipsoid is even more ellipsoid than before...
     Bx, By, Bz = read_compass_values()
     points = correct_manually(Bx, By, Bz)
     display_compass_values(points)

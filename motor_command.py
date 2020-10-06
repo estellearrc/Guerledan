@@ -114,6 +114,7 @@ if __name__ == "__main__":
         #print("Bx = %d G, By = %d G, Bz = %d G" % (Bx, By, Bz))
         # print(coord)
         Bx, By, Bz = coord[0, 0], coord[1, 0], coord[2, 0]
+        print("Bx By Bz", (Bx, By, Bz))
         cap_rad = compute_heading(Bx, By)
         cap = cap_rad*180/np.pi
         time.sleep(0.5)
