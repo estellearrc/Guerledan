@@ -52,7 +52,7 @@ def write_compass_values():
         three_values = convert(six_values)
         fichier.write(
             str(three_values[0])+";"+str(three_values[1])+";"+str(three_values[2]) + "\n")
-        #print(three_values)
+        # print(three_values)
         time.sleep(dt)
     fichier.close()
 
@@ -71,6 +71,10 @@ def retrieve_compass_values():
     bus.write_byte_data(DEVICE_ADDRESS, CTRL_REG3, 0b00000000)
     six_values = bus.read_i2c_block_data(DEVICE_ADDRESS, OUT_X_L, 6)
     x, y, z = convert(six_values)
+    return x, y, z
+
+
+def tranform_compass_data(x, y, z):
     point = np.array([x, y, z])
     center = np.array([[413.], [-2209.], [3626.5]])
     point_trans = translate(point, center)
@@ -144,6 +148,11 @@ def calibrate():
     # display_compass_values(points_trans, center)
     points_norm = normalize(points_trans)
     display_compass_values(points_norm, center)
+
+
+def test():
+    x, y, z = retrieve_compass_values()
+    print("Bx = %d G, By = %d G, Bz = %d G", x, y, z)
 
 
 if __name__ == "__main__":
