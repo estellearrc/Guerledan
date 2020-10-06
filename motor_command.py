@@ -5,6 +5,22 @@ import numpy as np
 import sys
 import arduino_driver_py3 as ardudrv
 import tst_compass as cmps
+# from roblib import *
+
+
+def sawtooth(x):
+    return (x+pi) % (2*pi)-pi   # or equivalently   2*arctan(tan(x/2))
+
+
+def compute_command():
+    y0 = 0
+    x, y, z = cmps.read_compass_values()
+    e = y-y0
+    M = np.array([1, -1], [1, 1])
+    b = np.array([[sawtooth(e)], [1]])
+    M_1 = np.linalg.pinv(M)
+    u = M_1*b
+    return u
 
 
 if __name__ == "__main__":
@@ -20,7 +36,8 @@ if __name__ == "__main__":
     print("... done")
 
     # test simple sur les moteurs
-    x, y, z = cmps.read_compass_values()
+    cmdl = u[0, 0]
+    cmdr = u[1, 0]
     if y > 0:
         cmdl = 40
         cmdr = 0
