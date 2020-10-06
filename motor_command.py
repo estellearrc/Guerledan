@@ -13,11 +13,11 @@ def sawtooth(x):
 
 
 def compute_command(cap, cap0):
-    e = cap-cap0
+    e = cap-cap0 #erreur
     M = np.array([1, -1], [1, 1])
     b = np.array([[sawtooth(e)], [1]])
-    M_1 = np.linalg.pinv(M)
-    u = M_1*b
+    M_1 = np.linalg.pinv(M) #resolution of the system
+    u = M_1*b #command motor array
     return u
 
 
@@ -35,9 +35,9 @@ if __name__ == "__main__":
 
     # test simple sur les moteurs
     y0 = 0
-    x, y, z = cmps.read_compass_values()
+    x, y, z = cmps.retrieve_compass_values()
     u = compute_command(y, y0)
-    cmdl = u[0, 0]
+    cmdl = u[0, 0] #left ou right ?
     cmdr = u[1, 0]
     if y > 0:
         cmdl = 40  # angle velocity
