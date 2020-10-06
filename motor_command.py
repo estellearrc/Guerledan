@@ -9,16 +9,18 @@ import tst_compass as cmps
 
 
 def sawtooth(x):
-    return (x+np.pi) % (2*np.pi)-np.pi   # or equivalently   2*arctan(tan(x/2))
+    # x in radians
+    return (x*np.pi/180 + np.pi) % (2*np.pi)-np.pi
 
 
-def compute_command(cap, cap0):
-    e = cap-cap0  # erreur
+def compute_command(e):
+    print(e)
     M = np.array([[1, -1], [1, 1]])
     b = np.array([[sawtooth(e)], [1]])
     M_1 = np.linalg.pinv(M)  # resolution of the system
-    u = M_1*b  # command motor array
-    return u
+    u = M_1.dot(b)  # command motor array
+    print("u = ", u)
+    return 50*u
 
 
 def compute_heading(Bx, By):
@@ -39,20 +41,38 @@ if __name__ == "__main__":
 
     # motor regulation to follow a given heading
     cap0 = 64  # North heading in degrees
-    Bx, By, Bz = cmps.retrieve_compass_values()
-    coord = cmps.tranform_compass_data(Bx, By, Bz)
-    print(coord)
-    Bx, By, Bz = coord[0, 0], coord[1, 0], coord[2, 0]
-    cap = compute_heading(Bx, By)
-    u = compute_command(cap, cap0)
-    cmdl = u[0, 0]  # left or right ?
-    cmdr = u[1, 0]
-    print("set motors to L=%d R=%d ..." % (cmdl, cmdr))
-    ardudrv.send_arduino_cmd_motor(serial_arduino, cmdl, cmdr)
-    print("... done")
+    coef_left_motor = 1.75
+    while(1):
+        Bx, By, Bz = cmps.retrieve_compass_values()  # retrieve brut values
+        coord = cmps.tranform_compass_data(Bx, By, Bz)  # correct brut values
+        print("Bx = %d G, By = %d G, Bz = %d G" % (Bx, By, Bz))
+        print(coord)
+        Bx, By, Bz = coord[0, 0], coord[1, 0], coord[2, 0]
+        cap = compute_heading(Bx, By)  # compute the wanted heading
+        print("cap = ", cap)
+        e = cap-cap0  # error of heading
 
-    print("get decoded data (debug) ...")
-    timeout = 1.0
-    data_arduino = ardudrv.get_arduino_decode_cmd(serial_arduino, timeout)
-    print("data:", data_arduino[0:-1])
-    print("... done")
+        u = compute_command(e)
+        cmdl = coef_left_motor*u[1, 0]  # command left motor
+        cmdr = u[0, 0]  # command right motor
+        print("set motors to L=%d R=%d ..." % (cmdl, cmdr))
+        ardudrv.send_arduino_cmd_motor(serial_arduino, cmdl, cmdr)
+        print("... done")
+
+        print("get decoded data (debug) ...")
+        timeout = 1.0
+        data_arduino = ardudrv.get_arduino_decode_cmd(serial_arduino, timeout)
+        print("data:", data_arduino[0:-1])
+        print("... done")
+
+    # print("set motors to L=0 R=0 ...")
+    # cmdl = 0
+    # cmdr = 0
+    # ardudrv.send_arduino_cmd_motor(serial_arduino, cmdl, cmdr)
+    # print("... done")
+
+    # print("get decoded data (debug) ...")
+    # timeout = 1.0
+    # data_arduino = ardudrv.get_arduino_decode_cmd(serial_arduino, timeout)
+    # print("data:", data_arduino[0:-1])
+    # print("... done")
