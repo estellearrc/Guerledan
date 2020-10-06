@@ -22,7 +22,7 @@ if __name__ == "__main__":
     # test simple sur les moteurs
     x, y, z = cmps.read_compass_values()
     if y > 0:
-        cmdl = 40
+        cmdl = 40 #angle velocity
         cmdr = 0
         print("set motors to L=%d R=%d ..." % (cmdl, cmdr))
         ardudrv.send_arduino_cmd_motor(serial_arduino, cmdl, cmdr)
