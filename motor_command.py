@@ -21,7 +21,7 @@ def compute_command(e):
     M_1 = np.linalg.pinv(M)  # resolution of the system
     u = M_1.dot(b)  # command motor array
     print("u = ", u)
-    return 127*u
+    return 50*u
 
 
 def compute_velocity_reg(e, u):
@@ -108,3 +108,13 @@ def motor_com(cap0):
 if __name__ == "__main__":
     cap0 = 0  # North heading in degrees
     # motor_com(cap0)
+    while(1):
+        Bx, By, Bz = cmps.retrieve_compass_values()  # retrieve brut values
+        coord = cmps.tranform_compass_data(Bx, By, Bz)  # correct brut values
+        #print("Bx = %d G, By = %d G, Bz = %d G" % (Bx, By, Bz))
+        # print(coord)
+        Bx, By, Bz = coord[0, 0], coord[1, 0], coord[2, 0]
+        cap_rad = compute_heading(Bx, By)
+        cap = cap_rad*180/np.pi
+        time.sleep(0.5)
+        print(cap)

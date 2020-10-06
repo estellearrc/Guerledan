@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
-import smbus
+#import smbus
 import time
 import numpy as np
-#from roblib import *
+from roblib import *
 
 
 def merge(lower_byte, upper_byte):
@@ -76,7 +76,7 @@ def retrieve_compass_values():
 
 def tranform_compass_data(x, y, z):
     point = np.array([x, y, z])
-    center = np.array([[413.], [-2209.], [3626.5]])
+    center = np.array([[334.], [-2022.], [3758.]]) #358,-2237,3614 /334,-2022,3758
     point_trans = translate(point, center)
     point_norm = normalize(point_trans)
     return point_norm
@@ -139,11 +139,12 @@ def normalize(points):
 
 
 def calibrate():
-    write_compass_values()
+    #write_compass_values()
     X, Y, Z = read_compass_values()
     points = np.array([X, Y, Z])
     # display_compass_values(points)
     center = computer_ellipse_center(X, Y, Z)
+    print(center)
     points_trans = translate(points, center)
     # display_compass_values(points_trans, center)
     points_norm = normalize(points_trans)
