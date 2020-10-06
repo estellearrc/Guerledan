@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
-import smbus
+# import smbus
 import time
 import numpy as np
-#from roblib import *
+from roblib import *
 
 
 def merge(lower_byte, upper_byte):
@@ -155,6 +155,23 @@ def test():
     print("Bx = %d G, By = %d G, Bz = %d G", x, y, z)
 
 
+def correct_manually(Bx, By, Bz):
+    b = np.array([[-261], [2105], [-1350]])
+    A = np.array(
+        [[-6789, 926, -402], [-680, -3446, -1742], [5326, 3904, 11426]])
+    B = np.array([[Bx], [By], [Bz]])
+    B_corrected = np.linalg.pinv(A).dot(B + b)
+    return B_corrected
+
+
+def calibrate_manually():
+    X, Y, Z = read_compass_values()
+    B = np.array([X, Y, Z])
+    points = correct_manually(B[0, 0], B[1, 0], B[2, 0])
+    display_compass_values(points)
+
+
 if __name__ == "__main__":
     # calibrate()
-    retrieve_compass_values()
+    # retrieve_compass_values()
+    calibrate_manually()
