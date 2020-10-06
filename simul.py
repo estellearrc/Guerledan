@@ -1,7 +1,7 @@
 import numpy as np
 from roblib import *
 
-p1,p2,p3,u1,u2 = 1,1,1,1,0
+p1,p2,p3 = 1,1,2    
 
 
 def f(X,u):
@@ -19,12 +19,15 @@ def draw_boat(X):
 
 if __name__ == "__main__":
     ax=init_figure(-5,60,-5,60)
-    u = [50,30]
-    X= array([[0],[0],[45],[10]])
+    u = [50,50]
+    X= array([[0],[0],[45],[50]])
     dt = 0.01
     for t in arange(0,10,dt):
         clear(ax)
+        if t>=2:
+            print("Coucou je suis a 0"+str(t)+"," +str(X[3,0]))
+            u = [0,0]
         draw_box(ax,-5,40,-5,50,"cyan")
         X = X + dt*f(X,u)
         draw_boat(X)
-        pause(0.1)
+        pause(0.01)
