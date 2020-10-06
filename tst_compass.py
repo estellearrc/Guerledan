@@ -153,8 +153,10 @@ def calibrate():
 def test():
     x, y, z = retrieve_compass_values()
     print("Bx = %d G, By = %d G, Bz = %d G", x, y, z)
-
+    time.sleep(1)
 
 if __name__ == "__main__":
     # calibrate()
-    retrieve_compass_values()
+    #retrieve_compass_values()
+    while(1):
+        test()
