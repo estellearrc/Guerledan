@@ -19,7 +19,7 @@ from scipy.linalg import sqrtm,expm,logm,norm,block_diag
 from scipy.signal import place_poles
 from mpl_toolkits.mplot3d import Axes3D
 from math import factorial
-from matplotlib.patches import Ellipse,Rectangle,Circle, Wedge, Polygon, Arc
+from matplotlib.patches import Ellipse,Circle, Wedge, Polygon, Arc
 from matplotlib.collections import PatchCollection
 
 
