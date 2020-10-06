@@ -157,25 +157,27 @@ def test():
 
 
 def correct_manually(Bx, By, Bz):
+    # A and b have been obtained with
     b = np.array([[-261], [2105], [-1350]])
     A = np.array(
         [[-6789, 926, -402], [-680, -3446, -1742], [5326, 3904, 11426]])
-    B = np.array([[Bx], [By], [Bz]])
+    B = np.array([Bx, By, Bz])
+    # print(B)
     B_corrected = np.linalg.pinv(A).dot(B + b)
     return B_corrected
 
 
 def calibrate_manually():
-    X, Y, Z = read_compass_values()
-    B = np.array([X, Y, Z])
-    points = correct_manually(B[0, 0], B[1, 0], B[2, 0])
+    # second way to calibrate the boussole, doesn't work... the ellipsoid is even more ellipsoid than before...
+    Bx, By, Bz = read_compass_values()
+    points = correct_manually(Bx, By, Bz)
     display_compass_values(points)
 
 
 if __name__ == "__main__":
-    # calibrate()
+    calibrate()
     # retrieve_compass_values()
-    calibrate_manually()
+    # calibrate_manually()
     # retrieve_compass_values()
     # while(1):
     #     test()
