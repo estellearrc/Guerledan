@@ -21,6 +21,10 @@ def compute_command(cap, cap0):
     return u
 
 
+def compute_heading(Bx, By):
+    return np.arctan2(By, Bx)*180/np.pi
+
+
 if __name__ == "__main__":
     print("init arduino ...")
     serial_arduino, data_arduino = ardudrv.init_arduino_line()
@@ -33,26 +37,19 @@ if __name__ == "__main__":
     print("data:", data_arduino[0:-1])
     print("... done")
 
-    # test simple sur les moteurs
-    y0 = 0
-    coord = cmps.retrieve_compass_values()
+    # motor regulation to follow a given heading
+    cap0 = 64  # North heading in degrees
+    Bx, By, Bz = cmps.retrieve_compass_values()
+    coord = cmps.tranform_compass_data(Bx, By, Bz)
     print(coord)
-    x, y, z = coord[0, 0], coord[1, 0], coord[2, 0]
-    u = compute_command(y, y0)
-    cmdl = u[0, 0]  # left ou right ?
+    Bx, By, Bz = coord[0, 0], coord[1, 0], coord[2, 0]
+    cap = compute_heading(Bx, By)
+    u = compute_command(cap, cap0)
+    cmdl = u[0, 0]  # left or right ?
     cmdr = u[1, 0]
-    if y > 0:
-        cmdl = 40  # angle velocity
-        cmdr = 0
-        print("set motors to L=%d R=%d ..." % (cmdl, cmdr))
-        ardudrv.send_arduino_cmd_motor(serial_arduino, cmdl, cmdr)
-        print("... done")
-    else:
-        cmdl = 0
-        cmdr = 40
-        print("set motors to L=%d R=%d ..." % (cmdl, cmdr))
-        ardudrv.send_arduino_cmd_motor(serial_arduino, cmdl, cmdr)
-        print("... done")
+    print("set motors to L=%d R=%d ..." % (cmdl, cmdr))
+    ardudrv.send_arduino_cmd_motor(serial_arduino, cmdl, cmdr)
+    print("... done")
 
     print("get decoded data (debug) ...")
     timeout = 1.0
