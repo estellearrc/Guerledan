@@ -39,7 +39,7 @@ if __name__ == "__main__":
     cmdl = u[0, 0]
     cmdr = u[1, 0]
     if y > 0:
-        cmdl = 40
+        cmdl = 40 #angle velocity
         cmdr = 0
         print("set motors to L=%d R=%d ..." % (cmdl, cmdr))
         ardudrv.send_arduino_cmd_motor(serial_arduino, cmdl, cmdr)
