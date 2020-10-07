@@ -39,7 +39,7 @@ def compute_command(e):
     M_1 = np.linalg.pinv(M)  # resolution of the system
     u = M_1.dot(b)  # command motor array
     print("u = ", u)
-    return 40*u
+    return 100*u
 
 
 def compute_velocity_reg(e, u):
@@ -105,7 +105,7 @@ def motor_com(cap0):
         Bx, By, Bz = coord[0, 0], coord[1, 0], coord[2, 0]
         cap = compute_heading(Bx, By)  # compute the wanted heading
         #print("cap = ", cap)
-        e = cap-cap0  # error of heading
+        e = 0.5*(cap-cap0)  # error of heading
         u = np.abs(compute_command(e))
         #u_regu = compute_velocity_reg(e,u)
 
@@ -158,15 +158,15 @@ def test_motor():
 
 
 if __name__ == "__main__":
-    # cap0 = 0  # North heading in degrees
-    #motor_com(cap0)
+    cap0 = 1.5  # North heading in degrees
+    motor_com(cap0)
     # test_motor()
-    while(1):
-        serial_arduino, data_arduino = ardudrv.init_arduino_line()
-        timeout = 1.0
-        data_arduino = ardudrv.get_arduino_status(serial_arduino, timeout)
-        ardudrv.send_arduino_cmd_motor(serial_arduino, 50, 50)
-        write_data()
+    # while(1):
+    #     serial_arduino, data_arduino = ardudrv.init_arduino_line()
+    #     timeout = 1.0
+    #     data_arduino = ardudrv.get_arduino_status(serial_arduino, timeout)
+    #     ardudrv.send_arduino_cmd_motor(serial_arduino, 50, 50)
+    #     write_data()
 
 
 """

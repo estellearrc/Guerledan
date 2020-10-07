@@ -4,8 +4,7 @@ import smbus
 import time
 import numpy as np
 from tst_compass import convert
-import matplotlib.pyplot as plt
-
+# import matplotlib.pyplot as plt
 
 
 def read_data():
@@ -20,10 +19,11 @@ def read_data():
     OUT_X_L = 0x28  # first data register to read
     # Set continuous-conversion mode to (MD1=0,MD0=0)
     bus.write_byte_data(DEVICE_ADDRESS, CTRL1_XL, 0b01001000)
-    #read values
+    # read values
     six_values = bus.read_i2c_block_data(DEVICE_ADDRESS, OUT_X_L, 6)
     three_values = convert(six_values)
     return three_values
+
 
 def write_data():
     """
@@ -31,7 +31,7 @@ def write_data():
     Write data in a csv doc
     """
     fichier = open("data_accelero.csv", "w")
-    for i in np.arange(0,100,0.1):
+    for i in np.arange(0, 100, 0.1):
         three_values = read_data()
         fichier = open("data_accelero.csv", "w")
         fichier.write(
@@ -40,22 +40,23 @@ def write_data():
     fichier.close()
 
 
-
 def test_acceleration(three_values):
     """
     Test if the data shown an acceleration
     """
     value_pass = 0
-    status = np.array([[0],[0],[0]]) #status of accelero, 1: accelero positifs, -1 negativ
+    # status of accelero, 1: accelero positifs, -1 negativ
+    status = np.array([[0], [0], [0]])
     if three_values[0] >= value_pass:
-        status[0,0] = 1
+        status[0, 0] = 1
     elif three_values[0] <= -value_pass:
-        status[0,0] = -1
+        status[0, 0] = -1
     if three_values[1] >= value_pass:
-        status[1,0] = 1
+        status[1, 0] = 1
     elif three_values[1] <= -value_pass:
-        status[1,0] = -1
-    return  status
+        status[1, 0] = -1
+    return status
+
 
 def display_frequencies():
     """
@@ -70,14 +71,17 @@ def display_frequencies():
         X.append(int(line[0]))
         Y.append(int(line[1]))
         Z.append(int(line[2]))
-    
-    n = np.linspace(0,len(X),1) #doute sur le pas
-    X_fft = np.fft.fft(X,n)
-    Y_fft = np.fft.fft(Y,n)
+    fichier.close()
+    n = np.arange(0, len(X), 1)  # doute sur le pas
+    # X = np.transpose(np.array(X))
+    # print(X)
+    X_fft = np.fft.fft(X)
+    Y_fft = np.fft.fft(Y)
     plt.figure()
-    plt.plot(n,X_fft)
-    plt.plot(n,Y_fft)
+    plt.plot(n, X_fft)
+    plt.plot(n, Y_fft)
     plt.show()
+
 
 def filtrage():
     """
@@ -86,6 +90,5 @@ def filtrage():
 
 
 if __name__ == "__main__":
-    write_data()
-    #display_frequencies()
-    
+    # write_data()
+    display_frequencies()
