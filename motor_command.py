@@ -39,13 +39,7 @@ def compute_command(e):
     M_1 = np.linalg.pinv(M)  # resolution of the system
     u = M_1.dot(b)  # command motor array
     print("u = ", u)
-
-
-<< << << < HEAD
-return 40*u
-== == == =
-return 50*u
->>>>>> > 22b4ecb720b091493eea0cbcdc96e2dcf492b07c
+    return 40*u
 
 
 def compute_velocity_reg(e, u):
