@@ -39,7 +39,7 @@ def compute_command(e):
     M_1 = np.linalg.pinv(M)  # resolution of the system
     u = M_1.dot(b)  # command motor array
     print("u = ", u)
-    return 100*u
+    return 40*u
 
 
 def compute_velocity_reg(e, u):
@@ -115,7 +115,7 @@ def motor_com(cap0):
         print("set motors to L=%d R=%d ..." % (cmdl, cmdr))
         ardudrv.send_arduino_cmd_motor(serial_arduino, cmdl, cmdr)
         print("... done")
-        data = read_data() # test choc for tst_accelero
+        data = read_data()  # test choc for tst_accelero
         print(data)
         print("get decoded data (debug) ...")
         timeout = 1.0
@@ -125,8 +125,19 @@ def motor_com(cap0):
 
 
 if __name__ == "__main__":
-    cap0 = 1.5  # North heading in degrees
-    motor_com(cap0)
+    cap0 = 0  # North heading in degrees
+    # motor_com(cap0)
+    while(1):
+        Bx, By, Bz = cmps.retrieve_compass_values()  # retrieve brut values
+        coord = cmps.tranform_compass_data(Bx, By, Bz)  # correct brut values
+        #print("Bx = %d G, By = %d G, Bz = %d G" % (Bx, By, Bz))
+        # print(coord)
+        Bx, By, Bz = coord[0, 0], coord[1, 0], coord[2, 0]
+        print("Bx By Bz", (Bx, By, Bz))
+        cap_rad = compute_heading(Bx, By)
+        cap = cap_rad*180/np.pi
+        time.sleep(0.5)
+        print(cap)
 
 
 """

@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
-# import smbus
+import smbus
 import time
 import numpy as np
-from roblib import *
+# from roblib import *
 
 
 def merge(lower_byte, upper_byte):
@@ -85,12 +85,12 @@ def tranform_compass_data(x, y, z):
     """
     correct one point to fit a sphere instead of an ellipsoid
     """
-    # point = np.array([[x], [y], [z]])
-    # center = np.array([[334.], [-2022.], [3758.]])
-    # point_trans = translate(point, center)
-    # point = normalize_1_point(point_trans)
-    point = correct_manually(x, y, z)
-    return point
+    point = np.array([[x], [y], [z]])
+    center = np.array([[334.], [-2022.], [3758.]])
+    point_trans = translate(point, center)
+    point_norm = normalize_1_point(point_trans)
+    # point = correct_manually(x, y, z)
+    return point_norm
 
 
 def read_compass_values():
@@ -115,14 +115,14 @@ def display_compass_values(points, center=np.array([[0], [0], [0]])):
     Display in a 3d figure the compass values (display ellipsoid or sphere)
     """
     fig = figure()
-    # ax = Axes3D(fig)
-    # plot3D(ax, points)
-    # R = eye(3, 3)
-    # draw_axis3D(ax, 0, 0, 0, R, zoom=50)
-    # draw_axis3D(ax, center[0, 0], center[1, 0], center[2, 0], R, zoom=50)
-    X = points[0, :]
-    Y = points[1, :]
-    plot(Y/X, np.arctan2(Y, X)*180/pi)
+    ax = Axes3D(fig)
+    plot3D(ax, points)
+    R = eye(3, 3)
+    draw_axis3D(ax, 0, 0, 0, R, zoom=50)
+    draw_axis3D(ax, center[0, 0], center[1, 0], center[2, 0], R, zoom=50)
+    # X = points[0, :]
+    # Y = points[1, :]
+    # plot(Y/X, np.arctan2(Y, X)*180/pi)
     show()
 
 
@@ -136,9 +136,6 @@ def computer_ellipse_center(X, Y, Z):
     center = np.array(
         [[(maxX+minX)/2], [(maxY+minY)/2], [(maxZ+minZ)/2]])
     return center
-
-
-²
 
 
 def translate(points, p):
@@ -230,8 +227,7 @@ def correct_manually(Bx, By, Bz):
     a2 = (x2+b)/beta
     a3 = (x3+b)/beta
     A = np.hstack((a1, a2, a3))
-    B = 3000*np.array([[Bx], [By], [Bz]])
-    # print(B)
+    B = np.array([[Bx], [By], [Bz]])
     B_corrected = np.linalg.pinv(A).dot(B + b)
     return B_corrected
 
@@ -248,9 +244,9 @@ def calibrate_manually():
 
 
 if __name__ == "__main__":
-    # calibrate()
+    calibrate()
     # retrieve_compass_values()
-    calibrate_manually()
+    # calibrate_manually()
     # retrieve_compass_values()
     # while(1):
     #     test()
