@@ -30,7 +30,7 @@ def write_data():
     FILTRAGE
     Write data in a csv doc
     """
-    fichier = open("data_compass.csv", "w")
+    fichier = open("data_accelero.csv", "w")
     for i in np.arange(0,100,0.1):
         three_values = read_data()
         fichier = open("data_accelero.csv", "w")
@@ -70,12 +70,13 @@ def display_frequencies():
         X.append(int(line[0]))
         Y.append(int(line[1]))
         Z.append(int(line[2]))
+    
     n = np.linspace(0,len(X),1) #doute sur le pas
     X_fft = np.fft.fft(X,n)
     Y_fft = np.fft.fft(Y,n)
     plt.figure()
-    plt.plot(n,X)
-    plt.plot(n,Y)
+    plt.plot(n,X_fft)
+    plt.plot(n,Y_fft)
     plt.show()
 
 def filtrage():
@@ -86,5 +87,5 @@ def filtrage():
 
 if __name__ == "__main__":
     write_data()
-    display_frequencies()
+    #display_frequencies()
     

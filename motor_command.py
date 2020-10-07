@@ -6,7 +6,7 @@ import sys
 import arduino_driver_py3 as ardudrv
 import tst_compass as cmps
 from encoders_driver_py3 import*
-# from tst_accelero import read_data
+from tst_accelero import write_data
 # from roblib import *
 
 # cmdl = 40
@@ -158,9 +158,16 @@ def test_motor():
 
 
 if __name__ == "__main__":
-    cap0 = 0  # North heading in degrees
-    motor_com(cap0)
+    # cap0 = 0  # North heading in degrees
+    #motor_com(cap0)
     # test_motor()
+    while(1):
+        serial_arduino, data_arduino = ardudrv.init_arduino_line()
+        timeout = 1.0
+        data_arduino = ardudrv.get_arduino_status(serial_arduino, timeout)
+        ardudrv.send_arduino_cmd_motor(serial_arduino, 50, 50)
+        write_data()
+
 
 """
 Test angles heading
