@@ -7,32 +7,54 @@ from tst_compass import convert
 # import matplotlib.pyplot as plt
 
 
-def read_data():
+def init_accelero(bus, DEVICE_ADDRESS):
+    CTRL1_XL = 0x10
+    CTRL2_G = 0x11
+    CTRL3_C = 0x12
+    CTRL4_C = 0x13
+    CTRL5_C = 0x14
+    CTRL6_C = 0x15
+    CTRL7_G = 0x16
+    CTRL8_XL = 0x17
+    CTRL9_XL = 0x18
+    CTRL10_C = 0x19
+    config_CTRL1 = 0b01010111
+    config_CTRL2 = 0b01010000
+    config_CTRL5 = 0b01100100
+    config_CTRL6 = 0b00100000
+    config_CTRL7 = 0b00000000
+    config_CTRL8 = 0b10100101
+    config_CTRL9 = 0b00111000
+    config_CTRL10 = 0b00111101
+    bus.write_byte_data(DEVICE_ADDRESS, CTRL1_XL, config_CTRL1)
+    bus.write_byte_data(DEVICE_ADDRESS, CTRL1_XL, config_CTRL2)
+    bus.write_byte_data(DEVICE_ADDRESS, CTRL1_XL, config_CTRL5)
+    bus.write_byte_data(DEVICE_ADDRESS, CTRL1_XL, config_CTRL6)
+    bus.write_byte_data(DEVICE_ADDRESS, CTRL1_XL, config_CTRL7)
+    bus.write_byte_data(DEVICE_ADDRESS, CTRL1_XL, config_CTRL8)
+    bus.write_byte_data(DEVICE_ADDRESS, CTRL1_XL, config_CTRL9)
+    bus.write_byte_data(DEVICE_ADDRESS, CTRL1_XL, config_CTRL10)
+
+
+def read_data(bus, DEVICE_ADDRESS):
     """
     Read data from accelero by I2C
     """
-    # 0 = /dev/i2c-0 (port I2C0), 1 = /dev/i2c-1 (port I2C1)
-    bus = smbus.SMBus(1)
-    # 7 bit address (will be left shifted to add the read write bit)
-    DEVICE_ADDRESS = 0x6b
-    CTRL1_XL = 0x10
     OUT_X_L = 0x28  # first data register to read
-    # Set continuous-conversion mode to (MD1=0,MD0=0)
-    bus.write_byte_data(DEVICE_ADDRESS, CTRL1_XL, 0b01001000)
     # read values
     six_values = bus.read_i2c_block_data(DEVICE_ADDRESS, OUT_X_L, 6)
     three_values = convert(six_values)
     return three_values
 
 
-def write_data():
+def write_data(bus, DEVICE_ADDRESS):
     """
     FILTRAGE
     Write data in a csv doc
     """
     fichier = open("data_accelero.csv", "w")
     for i in np.arange(0, 100, 0.1):
-        three_values = read_data()
+        three_values = read_data(bus, DEVICE_ADDRESS)
         fichier = open("data_accelero.csv", "w")
         fichier.write(
             str(three_values[0])+";"+str(three_values[1])+";"+str(three_values[2]) + "\n")
@@ -90,5 +112,10 @@ def filtrage():
 
 
 if __name__ == "__main__":
-    # write_data()
+    # 0 = /dev/i2c-0 (port I2C0), 1 = /dev/i2c-1 (port I2C1)
+    bus = smbus.SMBus(1)
+    # 7 bit address (will be left shifted to add the read write bit)
+    DEVICE_ADDRESS = 0x6b
+    init_accelero(bus, DEVICE_ADDRESS)
+    # write_data(bus, DEVICE_ADDRESS)
     display_frequencies()
