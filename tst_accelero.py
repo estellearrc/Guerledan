@@ -4,6 +4,7 @@ import smbus
 import time
 import numpy as np
 from tst_compass import convert
+import matplotlib.pyplot as plt
 
 
 
@@ -24,6 +25,22 @@ def read_data():
     three_values = convert(six_values)
     return three_values
 
+def write_data():
+    """
+    FILTRAGE
+    Write data in a csv doc
+    """
+    fichier = open("data_compass.csv", "w")
+    for i in np.arange(0,100,0.1):
+        three_values = read_data()
+        fichier = open("data_accelero.csv", "w")
+        fichier.write(
+            str(three_values[0])+";"+str(three_values[1])+";"+str(three_values[2]) + "\n")
+        time.sleep(0.1)
+    fichier.close()
+
+
+
 def test_acceleration(three_values):
     """
     Test if the data shown an acceleration
@@ -40,9 +57,34 @@ def test_acceleration(three_values):
         status[1,0] = -1
     return  status
 
+def display_frequencies():
+    """
+    Open a csv doc, read data show the data/frequencies
+    """
+    X = []
+    Y = []
+    Z = []
+    fichier = open("data_accelero.csv", "r")
+    for elt in fichier.readlines():
+        line = elt.strip("\n").split(";")
+        X.append(int(line[0]))
+        Y.append(int(line[1]))
+        Z.append(int(line[2]))
+    n = np.linspace(0,len(X),1) #doute sur le pas
+    X_fft = np.fft.fft(X,n)
+    Y_fft = np.fft.fft(Y,n)
+    plt.figure()
+    plt.plot(n,X)
+    plt.plot(n,Y)
+    plt.show()
+
+def filtrage():
+    """
+    """
+    pass
+
 
 if __name__ == "__main__":
-    while(1):
-        three_values = read_data()
-        print(three_values)
-        time.sleep(0.5)
+    write_data()
+    display_frequencies()
+    
