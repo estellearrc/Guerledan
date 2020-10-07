@@ -3,7 +3,11 @@
 import smbus
 import time
 import numpy as np
+<<<<<<< HEAD
 # from roblib import *
+=======
+#from roblib import *
+>>>>>>> 22b4ecb720b091493eea0cbcdc96e2dcf492b07c
 
 
 def merge(lower_byte, upper_byte):
