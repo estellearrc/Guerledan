@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
-# import smbus
+import smbus
 import time
 import numpy as np
-from roblib import *
+#from roblib import *
 
 
 def merge(lower_byte, upper_byte):
@@ -85,7 +85,7 @@ def tranform_compass_data(x, y, z):
     """
     correct one point to fit a sphere instead of an ellipsoid
     """
-    point = np.array([x, y, z])
+    point = np.array([[x], [y], [z]])
     center = np.array([[334.], [-2022.], [3758.]])
     point_trans = translate(point, center)
     point_norm = normalize_1_point(point_trans)
@@ -154,7 +154,7 @@ def normalize_1_point(point):
     x_sphere = 3000*x/a
     y_sphere = 3000*y/b
     z_sphere = 3000*z/c
-    return np.array([x_sphere, y_sphere, z_sphere])
+    return np.array([[x_sphere], [y_sphere], [z_sphere]])
 
 
 def normalize(points):

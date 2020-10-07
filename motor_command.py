@@ -43,7 +43,7 @@ def compute_velocity_reg(e, u):
 
 
 def compute_heading(Bx, By):
-    return np.arctan2(By, Bx)
+    return np.arctan2(By, Bx) + np.pi
 
 
 def turn_around_pool():
@@ -78,7 +78,7 @@ def motor_com(cap0):
     print("... done")
 
     # motor regulation to follow a given heading
-    coef_left_motor = 1.75  # WWARNING : to modif when use fonction u_regul
+    #coef_left_motor = 1.75  # WWARNING : to modif when use fonction u_regul
     while(1):
         Bx, By, Bz = cmps.retrieve_compass_values()  # retrieve brut values
         coord = cmps.tranform_compass_data(Bx, By, Bz)  # correct brut values
@@ -92,8 +92,8 @@ def motor_com(cap0):
         #u_regu = compute_velocity_reg(e,u)
 
         # command left motor #WARNING a modifier  par u_regul si vitessse regulee
-        cmdl = u[1, 0]
-        cmdr = 1.75*u[0, 0]  # command right motor
+        cmdl = u[0, 0]
+        cmdr = u[1, 0]  # command right motor
         print("set motors to L=%d R=%d ..." % (cmdl, cmdr))
         ardudrv.send_arduino_cmd_motor(serial_arduino, cmdl, cmdr)
         print("... done")
@@ -107,8 +107,15 @@ def motor_com(cap0):
 
 if __name__ == "__main__":
     cap0 = 0  # North heading in degrees
-    # motor_com(cap0)
-    while(1):
+    motor_com(cap0)
+
+
+
+
+
+"""
+Test angles heading
+while(1):
         Bx, By, Bz = cmps.retrieve_compass_values()  # retrieve brut values
         coord = cmps.tranform_compass_data(Bx, By, Bz)  # correct brut values
         #print("Bx = %d G, By = %d G, Bz = %d G" % (Bx, By, Bz))
@@ -119,3 +126,4 @@ if __name__ == "__main__":
         cap = cap_rad*180/np.pi
         time.sleep(0.5)
         print(cap)
+"""
