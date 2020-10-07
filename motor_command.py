@@ -116,7 +116,6 @@ def motor_com(cap0):
         ardudrv.send_arduino_cmd_motor(serial_arduino, cmdl, cmdr)
         print("... done")
         data = read_data()  # test choc for tst_accelero
-        print(data) read_data()  # test choc for tst_accelero
         print(data)
         print("get decoded data (debug) ...")
         timeout = 1.0
