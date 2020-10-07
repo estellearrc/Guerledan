@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
-import smbus
+# import smbus
 import time
 import numpy as np
-#from roblib import *
+from roblib import *
 
 
 def merge(lower_byte, upper_byte):
@@ -85,11 +85,12 @@ def tranform_compass_data(x, y, z):
     """
     correct one point to fit a sphere instead of an ellipsoid
     """
-    point = np.array([[x], [y], [z]])
-    center = np.array([[334.], [-2022.], [3758.]])
-    point_trans = translate(point, center)
-    point_norm = normalize_1_point(point_trans)
-    return point_norm
+    # point = np.array([[x], [y], [z]])
+    # center = np.array([[334.], [-2022.], [3758.]])
+    # point_trans = translate(point, center)
+    # point = normalize_1_point(point_trans)
+    point = correct_manually(x, y, z)
+    return point
 
 
 def read_compass_values():
@@ -212,9 +213,17 @@ def correct_manually(Bx, By, Bz):
     CALIBRATION
     Compute the center of the ellipsoid and apply the sphere deformation with values found experimentally (b, A)
     """
-    b = np.array([[-261], [2105], [-1350]])
-    A = np.array(
-        [[-6789, 926, -402], [-680, -3446, -1742], [5326, 3904, 11426]])
+    beta = 0.46  # magnetic field in Brest into Gauss
+    xb1 = np.array([[-2884], [-2032], [3993]])
+    xb2 = np.array([[3420], [-1736], [3437]])
+    x1 = xb1
+    x2 = np.array([[408], [-5190], [3750]])
+    x3 = np.array([[438], [-2120], [6747]])
+    b = -(xb1+xb2)/2
+    a1 = (x1+b)/beta
+    a2 = (x2+b)/beta
+    a3 = (x3+b)/beta
+    A = np.hstack((a1, a2, a3))
     B = np.array([Bx, By, Bz])
     # print(B)
     B_corrected = np.linalg.pinv(A).dot(B + b)
@@ -233,9 +242,9 @@ def calibrate_manually():
 
 
 if __name__ == "__main__":
-    calibrate()
+    # calibrate()
     # retrieve_compass_values()
-    # calibrate_manually()
+    calibrate_manually()
     # retrieve_compass_values()
     # while(1):
     #     test()
