@@ -6,6 +6,7 @@ import sys
 import arduino_driver_py3 as ardudrv
 import tst_compass as cmps
 from encoders_driver_py3 import*
+from tst_accelero import read_data
 # from roblib import *
 
 # cmdl = 40
@@ -38,7 +39,7 @@ def compute_command(e):
     M_1 = np.linalg.pinv(M)  # resolution of the system
     u = M_1.dot(b)  # command motor array
     print("u = ", u)
-    return 200*u
+    return 100*u
 
 
 def compute_velocity_reg(e, u):
@@ -114,7 +115,8 @@ def motor_com(cap0):
         print("set motors to L=%d R=%d ..." % (cmdl, cmdr))
         ardudrv.send_arduino_cmd_motor(serial_arduino, cmdl, cmdr)
         print("... done")
-
+        data = read_data() # test choc for tst_accelero
+        print(data)
         print("get decoded data (debug) ...")
         timeout = 1.0
         data_arduino = ardudrv.get_arduino_decode_cmd(serial_arduino, timeout)
