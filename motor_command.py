@@ -8,6 +8,23 @@ import tst_compass as cmps
 from encoders_driver_py3 import*
 # from roblib import *
 
+# cmdl = 40
+# cmdr = 40
+# duration = 2.0
+# try:
+#     cmdl = int(sys.argv[1])
+#     cmdr = cmdl
+# except:
+#     pass
+# try:
+#     cmdr = int(sys.argv[2])
+# except:
+#     pass
+# try:
+#     duration = float(sys.argv[3])
+# except:
+#     pass
+
 
 def sawtooth(x):
     # x in radians
@@ -21,7 +38,7 @@ def compute_command(e):
     M_1 = np.linalg.pinv(M)  # resolution of the system
     u = M_1.dot(b)  # command motor array
     print("u = ", u)
-    return 50*u
+    return 200*u
 
 
 def compute_velocity_reg(e, u):
@@ -78,7 +95,7 @@ def motor_com(cap0):
     print("... done")
 
     # motor regulation to follow a given heading
-    #coef_left_motor = 1.75  # WWARNING : to modif when use fonction u_regul
+    # coef_left_motor = 1.75  # WWARNING : to modif when use fonction u_regul
     while(1):
         Bx, By, Bz = cmps.retrieve_compass_values()  # retrieve brut values
         coord = cmps.tranform_compass_data(Bx, By, Bz)  # correct brut values
@@ -106,11 +123,8 @@ def motor_com(cap0):
 
 
 if __name__ == "__main__":
-    cap0 = 0  # North heading in degrees
+    cap0 = 1.5  # North heading in degrees
     motor_com(cap0)
-
-
-
 
 
 """
