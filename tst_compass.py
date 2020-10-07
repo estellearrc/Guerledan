@@ -115,11 +115,14 @@ def display_compass_values(points, center=np.array([[0], [0], [0]])):
     Display in a 3d figure the compass values (display ellipsoid or sphere)
     """
     fig = figure()
-    ax = Axes3D(fig)
-    plot3D(ax, points)
-    R = eye(3, 3)
-    draw_axis3D(ax, 0, 0, 0, R, zoom=50)
-    draw_axis3D(ax, center[0, 0], center[1, 0], center[2, 0], R, zoom=50)
+    # ax = Axes3D(fig)
+    # plot3D(ax, points)
+    # R = eye(3, 3)
+    # draw_axis3D(ax, 0, 0, 0, R, zoom=50)
+    # draw_axis3D(ax, center[0, 0], center[1, 0], center[2, 0], R, zoom=50)
+    X = points[0, :]
+    Y = points[1, :]
+    plot(Y/X, np.arctan2(Y, X)*180/pi)
     show()
 
 
@@ -133,6 +136,9 @@ def computer_ellipse_center(X, Y, Z):
     center = np.array(
         [[(maxX+minX)/2], [(maxY+minY)/2], [(maxZ+minZ)/2]])
     return center
+
+
+²
 
 
 def translate(points, p):
@@ -224,7 +230,7 @@ def correct_manually(Bx, By, Bz):
     a2 = (x2+b)/beta
     a3 = (x3+b)/beta
     A = np.hstack((a1, a2, a3))
-    B = np.array([Bx, By, Bz])
+    B = 3000*np.array([[Bx], [By], [Bz]])
     # print(B)
     B_corrected = np.linalg.pinv(A).dot(B + b)
     return B_corrected
