@@ -6,7 +6,7 @@ import sys
 import arduino_driver_py3 as ardudrv
 import tst_compass as cmps
 from encoders_driver_py3 import*
-from tst_accelero import write_data
+from tst_accelero import *
 # from roblib import *
 
 # cmdl = 40
@@ -39,7 +39,7 @@ def compute_command(e):
     M_1 = np.linalg.pinv(M)  # resolution of the system
     u = M_1.dot(b)  # command motor array
     print("u = ", u)
-    return 100*u
+    return 50*u
 
 
 def compute_velocity_reg(e, u):
@@ -158,15 +158,20 @@ def test_motor():
 
 
 if __name__ == "__main__":
-    cap0 = 1.5  # North heading in degrees
-    motor_com(cap0)
+    # cap0 = 1.5  # North heading in degrees
+    # motor_com(cap0)
     # test_motor()
-    # while(1):
-    #     serial_arduino, data_arduino = ardudrv.init_arduino_line()
-    #     timeout = 1.0
-    #     data_arduino = ardudrv.get_arduino_status(serial_arduino, timeout)
-    #     ardudrv.send_arduino_cmd_motor(serial_arduino, 50, 50)
-    #     write_data()
+    # 0 = /dev/i2c-0 (port I2C0), 1 = /dev/i2c-1 (port I2C1)
+    bus = smbus.SMBus(1)
+    # 7 bit address (will be left shifted to add the read write bit)
+    ACC_ADDRESS = 0x6b
+    init_accelero(bus, ACC_ADDRESS)
+    serial_arduino, data_arduino = ardudrv.init_arduino_line()
+    timeout = 1.0
+    data_arduino = ardudrv.get_arduino_status(serial_arduino, timeout)
+    ardudrv.send_arduino_cmd_motor(serial_arduino, 200, 200)
+    write_data(bus, ACC_ADDRESS,
+               "data_accelero_filtre_piscine5.csv")
 
 
 """

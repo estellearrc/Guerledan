@@ -1,17 +1,15 @@
 #!/usr/bin/python
 
-import smbus
+# import smbus
 import time
 import numpy as np
-from tst_compass import convert
-# import matplotlib.pyplot as plt
+# from tst_compass import convert
+import matplotlib.pyplot as plt
 
 
 def init_accelero(bus, DEVICE_ADDRESS):
     CTRL1_XL = 0x10
     CTRL2_G = 0x11
-    CTRL3_C = 0x12
-    CTRL4_C = 0x13
     CTRL5_C = 0x14
     CTRL6_C = 0x15
     CTRL7_G = 0x16
@@ -27,13 +25,13 @@ def init_accelero(bus, DEVICE_ADDRESS):
     config_CTRL9 = 0b00111000
     config_CTRL10 = 0b00111101
     bus.write_byte_data(DEVICE_ADDRESS, CTRL1_XL, config_CTRL1)
-    bus.write_byte_data(DEVICE_ADDRESS, CTRL1_XL, config_CTRL2)
-    bus.write_byte_data(DEVICE_ADDRESS, CTRL1_XL, config_CTRL5)
-    bus.write_byte_data(DEVICE_ADDRESS, CTRL1_XL, config_CTRL6)
-    bus.write_byte_data(DEVICE_ADDRESS, CTRL1_XL, config_CTRL7)
-    bus.write_byte_data(DEVICE_ADDRESS, CTRL1_XL, config_CTRL8)
-    bus.write_byte_data(DEVICE_ADDRESS, CTRL1_XL, config_CTRL9)
-    bus.write_byte_data(DEVICE_ADDRESS, CTRL1_XL, config_CTRL10)
+    bus.write_byte_data(DEVICE_ADDRESS, CTRL2_G, config_CTRL2)
+    bus.write_byte_data(DEVICE_ADDRESS, CTRL5_C, config_CTRL5)
+    bus.write_byte_data(DEVICE_ADDRESS, CTRL6_C, config_CTRL6)
+    bus.write_byte_data(DEVICE_ADDRESS, CTRL7_G, config_CTRL7)
+    bus.write_byte_data(DEVICE_ADDRESS, CTRL8_XL, config_CTRL8)
+    bus.write_byte_data(DEVICE_ADDRESS, CTRL9_XL, config_CTRL9)
+    bus.write_byte_data(DEVICE_ADDRESS, CTRL10_C, config_CTRL10)
 
 
 def read_data(bus, DEVICE_ADDRESS):
@@ -47,15 +45,14 @@ def read_data(bus, DEVICE_ADDRESS):
     return three_values
 
 
-def write_data(bus, DEVICE_ADDRESS):
+def write_data(bus, DEVICE_ADDRESS, file_name):
     """
     FILTRAGE
     Write data in a csv doc
     """
-    fichier = open("data_accelero.csv", "w")
+    fichier = open(file_name, "w")
     for i in np.arange(0, 100, 0.1):
         three_values = read_data(bus, DEVICE_ADDRESS)
-        fichier = open("data_accelero.csv", "w")
         fichier.write(
             str(three_values[0])+";"+str(three_values[1])+";"+str(three_values[2]) + "\n")
         time.sleep(0.1)
@@ -80,23 +77,26 @@ def test_acceleration(three_values):
     return status
 
 
-def display_frequencies():
+def read_csv(file_name):
     """
-    Open a csv doc, read data show the data/frequencies
+    Open a csv doc, read data and return them
     """
     X = []
     Y = []
     Z = []
-    fichier = open("data_accelero.csv", "r")
+    fichier = open(file_name, "r")
     for elt in fichier.readlines():
         line = elt.strip("\n").split(";")
         X.append(int(line[0]))
         Y.append(int(line[1]))
         Z.append(int(line[2]))
     fichier.close()
-    n = np.arange(0, len(X), 1)  # doute sur le pas
-    # X = np.transpose(np.array(X))
-    # print(X)
+    return X, Y, Z
+
+
+def display_frequencies(file_name):
+    X, Y, Z = read_csv(file_name)
+    n = np.arange(0, len(X), 1)
     X_fft = np.fft.fft(X)
     Y_fft = np.fft.fft(Y)
     plt.figure()
@@ -105,17 +105,37 @@ def display_frequencies():
     plt.show()
 
 
-def filtrage():
-    """
-    """
-    pass
+def display_graph(file_name):
+    X, Y, Z = read_csv(file_name)
+    n = np.arange(0, len(X), 1)
+    plt.figure()
+    plt.plot(n, X, "blue", label="Acc X")
+    plt.plot(n, Y, "green", label="Acc Y")
+    plt.plot(n, Z, "red", label="Acc Z")
+    plt.legend()
+    plt.show()
 
 
 if __name__ == "__main__":
-    # 0 = /dev/i2c-0 (port I2C0), 1 = /dev/i2c-1 (port I2C1)
-    bus = smbus.SMBus(1)
-    # 7 bit address (will be left shifted to add the read write bit)
-    DEVICE_ADDRESS = 0x6b
-    init_accelero(bus, DEVICE_ADDRESS)
-    # write_data(bus, DEVICE_ADDRESS)
-    display_frequencies()
+    # bus = smbus.SMBus(1)=
+    # DEVICE_ADDRESS = 0x6b
+    # init_accelero(bus, DEVICE_ADDRESS)
+    # write_data(bus, DEVICE_ADDRESS, "data_accelero_filtre.csv")
+    file_name = "data_accelero_filtre.csv"
+    # display_frequencies(file_name)
+    # display_graph(file_name)
+    # file_name = "data_accelero_filtre_avec_choc.csv"
+    # display_frequencies(file_name)
+    # display_graph(file_name)
+    # file_name = "data_accelero_filtre_avec_choc_5ypos_5yneg_5x.csv"
+    # display_graph(file_name)
+    # file_name = "data_accelero_filtre_piscine.csv"
+    # display_graph(file_name)
+    # file_name = "data_accelero_filtre_piscine2.csv"
+    # display_graph(file_name)
+    # file_name = "data_accelero_filtre_piscine3.csv"
+    # display_graph(file_name)
+    file_name = "data_accelero_filtre_piscine4.csv"
+    display_graph(file_name)
+    file_name = "data_accelero_filtre_piscine5.csv"
+    display_graph(file_name)
