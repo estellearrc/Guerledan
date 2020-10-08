@@ -3,6 +3,7 @@
 # import smbus
 import time
 import numpy as np
+import math
 # from tst_compass import convert
 import matplotlib.pyplot as plt
 
@@ -105,13 +106,37 @@ def display_frequencies(file_name):
     plt.show()
 
 
+def sign(num):
+    return -1 if num < 0 else 1
+
+
+def correct(x):
+    if abs(x) > 0 and abs(x) < 400:
+        x = x - sign(x)*250
+    return x
+
+
+def process(data_brut):
+    x, y, z = data_brut[0], data_brut[1], data_brut[2]
+    x = correct(x)
+    y = correct(y)
+    sum = x**2 + y**2
+    return sum
+
+
 def display_graph(file_name):
     X, Y, Z = read_csv(file_name)
+    print(np.mean(X))
+    print(np.mean(Y))
     n = np.arange(0, len(X), 1)
     plt.figure()
+    S = []
+    for i in range(min(len(X), len(Y))):
+        S.append(process([X[i], Y[i], 0]))
     plt.plot(n, X, "blue", label="Acc X")
     plt.plot(n, Y, "green", label="Acc Y")
-    plt.plot(n, Z, "red", label="Acc Z")
+    plt.plot(n, S, "magenta", label="X² + Y²")
+    # plt.plot(n, Z, "red", label="Acc Z")
     plt.legend()
     plt.show()
 
@@ -129,13 +154,15 @@ if __name__ == "__main__":
     # display_graph(file_name)
     # file_name = "data_accelero_filtre_avec_choc_5ypos_5yneg_5x.csv"
     # display_graph(file_name)
-    # file_name = "data_accelero_filtre_piscine.csv"
-    # display_graph(file_name)
-    # file_name = "data_accelero_filtre_piscine2.csv"
-    # display_graph(file_name)
-    # file_name = "data_accelero_filtre_piscine3.csv"
-    # display_graph(file_name)
+    file_name = "data_accelero_filtre_piscine.csv"
+    display_graph(file_name)
+    file_name = "data_accelero_filtre_piscine2.csv"
+    display_graph(file_name)
+    file_name = "data_accelero_filtre_piscine3.csv"
+    display_graph(file_name)
     file_name = "data_accelero_filtre_piscine4.csv"
     display_graph(file_name)
     file_name = "data_accelero_filtre_piscine5.csv"
     display_graph(file_name)
+    # file_name = "data_accelero_filtre_motor_on.csv"
+    # display_graph(file_name)

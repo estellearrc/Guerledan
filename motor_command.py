@@ -169,9 +169,9 @@ if __name__ == "__main__":
     serial_arduino, data_arduino = ardudrv.init_arduino_line()
     timeout = 1.0
     data_arduino = ardudrv.get_arduino_status(serial_arduino, timeout)
-    ardudrv.send_arduino_cmd_motor(serial_arduino, 200, 200)
+    ardudrv.send_arduino_cmd_motor(serial_arduino, 50, 50)
     write_data(bus, ACC_ADDRESS,
-               "data_accelero_filtre_piscine5.csv")
+               "data_accelero_filtre_motor_on.csv")
 
 
 """
