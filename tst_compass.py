@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
-import smbus
+# import smbus
 import time
 import numpy as np
-# from roblib import *
+from roblib import *
 
 
 def merge(lower_byte, upper_byte):
@@ -114,6 +114,7 @@ def display_compass_values(points, center=np.array([[0], [0], [0]])):
     """
     Display in a 3d figure the compass values (display ellipsoid or sphere)
     """
+    print(points)
     fig = figure()
     ax = Axes3D(fig)
     plot3D(ax, points)
@@ -227,7 +228,8 @@ def correct_manually(Bx, By, Bz):
     a2 = (x2+b)/beta
     a3 = (x3+b)/beta
     A = np.hstack((a1, a2, a3))
-    B = np.array([[Bx], [By], [Bz]])
+    B = np.array([Bx, By, Bz])
+    print("b",B)
     B_corrected = np.linalg.pinv(A).dot(B + b)
     return B_corrected
 
@@ -244,9 +246,10 @@ def calibrate_manually():
 
 
 if __name__ == "__main__":
-    calibrate()
+    # calibrate()
     # retrieve_compass_values()
-    # calibrate_manually()
+    calibrate_manually()
     # retrieve_compass_values()
     # while(1):
     #     test()
+

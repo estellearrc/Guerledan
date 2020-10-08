@@ -67,17 +67,32 @@ def compute_heading(Bx, By):
 def turn_around_pool():
     """
     Turn around a pool by a,b,c,d cap
+    Trigo sens = turn alway on left
     """
-    # output accelerometre
-    # test acceleration
-    #cap = a
-    # if acceleration:
-    #new_cap = b
-    # if acceleration:
-    #new_cap = c
-    # if acceleration:
-    #new_cap = d
-    pass
+    #initialisation
+    serial_arduino, data_arduino = ardudrv.init_arduino_line()
+    ACC_ADDRESS = 0x6b
+    bus = smbus.SMBus(1)
+    timeout = 1.0
+    while(1):
+        timeout = 0.5
+        #  output accelerometre
+        data_brut_accelero = read_data(bus,ACC_ADDRESS)
+        data_process = process(data_brut_accelero) #data processing
+        status = test_acceleration(data_process) #status acelero
+        if status == 1: #if we detect a choc
+                #First, we set motors to 0
+                data_arduino = ardudrv.get_arduino_status(serial_arduino, timeout)
+                ardudrv.send_arduino_cmd_motor(serial_arduino, 0, 0) #velocity motor
+                time.sleep(1)
+                #Then, we switch on right motor
+                data_arduino = ardudrv.get_arduino_status(serial_arduino, timeout)
+                ardudrv.send_arduino_cmd_motor(serial_arduino, 0, 200) #velocity motor
+        else:
+            #without choc we keep the same velocity on left and right motor
+            data_arduino = ardudrv.get_arduino_status(serial_arduino, timeout)
+            ardudrv.send_arduino_cmd_motor(serial_arduino, 0, 200) #velocity motor
+    
 
 
 def motor_com(cap0):
@@ -158,20 +173,7 @@ def test_motor():
 
 
 if __name__ == "__main__":
-    # cap0 = 1.5  # North heading in degrees
-    # motor_com(cap0)
-    # test_motor()
-    # 0 = /dev/i2c-0 (port I2C0), 1 = /dev/i2c-1 (port I2C1)
-    bus = smbus.SMBus(1)
-    # 7 bit address (will be left shifted to add the read write bit)
-    ACC_ADDRESS = 0x6b
-    init_accelero(bus, ACC_ADDRESS)
-    serial_arduino, data_arduino = ardudrv.init_arduino_line()
-    timeout = 1.0
-    data_arduino = ardudrv.get_arduino_status(serial_arduino, timeout)
-    ardudrv.send_arduino_cmd_motor(serial_arduino, 200, 200)
-    write_data(bus, ACC_ADDRESS,
-               "data_accelero_filtre_piscine5.csv")
+    turn_around_pool()
 
 
 """
@@ -187,4 +189,21 @@ while(1):
         cap = cap_rad*180/np.pi
         time.sleep(0.5)
         print(cap)
+"""
+"""
+Get plot accelero
+# cap0 = 1.5  # North heading in degrees
+    # motor_com(cap0)
+    # test_motor()
+    # 0 = /dev/i2c-0 (port I2C0), 1 = /dev/i2c-1 (port I2C1)
+    bus = smbus.SMBus(1)
+    # 7 bit address (will be left shifted to add the read write bit)
+    ACC_ADDRESS = 0x6b
+    init_accelero(bus, ACC_ADDRESS)
+    serial_arduino, data_arduino = ardudrv.init_arduino_line()
+    timeout = 1.0
+    data_arduino = ardudrv.get_arduino_status(serial_arduino, timeout)
+    ardudrv.send_arduino_cmd_motor(serial_arduino, 200, 200)
+    write_data(bus, ACC_ADDRESS,
+               "data_accelero_filtre_piscine5.csv")
 """

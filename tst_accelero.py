@@ -1,10 +1,10 @@
 #!/usr/bin/python
 
-# import smbus
+import smbus
 import time
 import numpy as np
-# from tst_compass import convert
-import matplotlib.pyplot as plt
+from tst_compass import convert
+#import matplotlib.pyplot as plt
 
 
 def init_accelero(bus, DEVICE_ADDRESS):
@@ -63,17 +63,19 @@ def test_acceleration(three_values):
     """
     Test if the data shown an acceleration
     """
-    value_pass = 0
-    # status of accelero, 1: accelero positifs, -1 negativ
-    status = np.array([[0], [0], [0]])
-    if three_values[0] >= value_pass:
-        status[0, 0] = 1
-    elif three_values[0] <= -value_pass:
-        status[0, 0] = -1
-    if three_values[1] >= value_pass:
-        status[1, 0] = 1
-    elif three_values[1] <= -value_pass:
-        status[1, 0] = -1
+    # value_pass_y = 500
+    # value_pass_x = 500
+    #first we dont do the diff btw x and y
+    # status of accelero,y: 1: accelero positifs (droite) , -1 negativ (gauche)
+    # status = np.array([[0], [0], [0]])
+    # if three_values[0] >= value_pass_x or three_values[0] <= -value_pass_x :
+    #     status[0, 0] = 1 #we dont diff positif or negatif on x, y
+    # if three_values[1] >= value_pass_y or three_values[1] <= -value_pass_y:
+    #     status[1, 0] = 1 #we dont diff positif or negatif on x, y
+    
+    value_pass = 500
+    if three_values[0] >= value_pass or three_values[1] >= value_pass:
+        status = 1
     return status
 
 
