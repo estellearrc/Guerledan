@@ -1,11 +1,11 @@
 #!/usr/bin/python
 
-# import smbus
+import smbus
 import time
 import numpy as np
 import math
-# from tst_compass import convert
-import matplotlib.pyplot as plt
+from tst_compass import convert
+# import matplotlib.pyplot as plt
 
 
 def init_accelero(bus, DEVICE_ADDRESS):
@@ -60,21 +60,24 @@ def write_data(bus, DEVICE_ADDRESS, file_name):
     fichier.close()
 
 
-def test_acceleration(three_values):
+def test_acceleration(sum):
     """
     Test if the data shown an acceleration
     """
-    value_pass = 0
-    # status of accelero, 1: accelero positifs, -1 negativ
-    status = np.array([[0], [0], [0]])
-    if three_values[0] >= value_pass:
-        status[0, 0] = 1
-    elif three_values[0] <= -value_pass:
-        status[0, 0] = -1
-    if three_values[1] >= value_pass:
-        status[1, 0] = 1
-    elif three_values[1] <= -value_pass:
-        status[1, 0] = -1
+    # value_pass_y = 500
+    # value_pass_x = 500
+    # first we dont do the diff btw x and y
+    # status of accelero,y: 1: accelero positifs (droite) , -1 negativ (gauche)
+    # status = np.array([[0], [0], [0]])
+    # if three_values[0] >= value_pass_x or three_values[0] <= -value_pass_x :
+    #     status[0, 0] = 1 #we dont diff positif or negatif on x, y
+    # if three_values[1] >= value_pass_y or three_values[1] <= -value_pass_y:
+    #     status[1, 0] = 1 #we dont diff positif or negatif on x, y
+
+    value_pass = 450
+    status = 0
+    if sum >= value_pass:
+        status = 1
     return status
 
 
@@ -111,17 +114,17 @@ def sign(num):
 
 
 def correct(x):
-    if abs(x) > 0 and abs(x) < 400:
+    if abs(x) > 0 and abs(x) < 300:
         x = x - sign(x)*250
     return x
 
 
 def process(data_brut):
     x, y, z = data_brut[0], data_brut[1], data_brut[2]
-    x = correct(x)
-    y = correct(y)
-    sum = x**2 + y**2
-    return sum
+    # x = correct(x)
+    # y = correct(y)
+    # sum = x**2 + y**2
+    return abs(y)
 
 
 def display_graph(file_name):
@@ -135,7 +138,7 @@ def display_graph(file_name):
         S.append(process([X[i], Y[i], 0]))
     plt.plot(n, X, "blue", label="Acc X")
     plt.plot(n, Y, "green", label="Acc Y")
-    plt.plot(n, S, "magenta", label="X² + Y²")
+    plt.plot(n, S, "magenta", label="X2 + Y2")
     # plt.plot(n, Z, "red", label="Acc Z")
     plt.legend()
     plt.show()
