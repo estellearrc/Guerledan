@@ -110,8 +110,8 @@ def turn_around_pool(cmd):
         #  output accelerometre
         data_brut_accelero = read_data(bus, ACC_ADDRESS)
         #print("data =", data_brut_accelero)
-        status, nb_ech, sum_x, sum_y = process(data_brut_accelero, nb_ech,
-                                               sum_x, sum_y)  # data processing
+        res, status, nb_ech, sum_x, sum_y = process(data_brut_accelero, nb_ech,
+                                                    sum_x, sum_y)  # data processing
         #print("status =", status)
         if status == 1:  # if we detect a choc
             # First, we set motors to 0
@@ -244,13 +244,13 @@ def display_test_motor_speed():
     fichier = open("diff_vit_2_motors.csv", "r")
     for elt in fichier.readlines():
         line = elt.strip("\n").split(";")
-        vL.append(int(line[0]))
-        vR.append(int(line[1]))
+        vL.append(float(line[0]))
+        vR.append(float(line[1]))
     fichier.close()
     n = np.arange(0, len(vR), 1)
     plt.figure()
     plt.plot(n, vR, label="speed right motor (tick/sec), cmdr=50")
-    plt.plot(n, vL, label="speed left motor (tick/sec), cmdr=50")
+    plt.plot(n, vL, label="speed left motor (tick/sec), cmdl=50")
     plt.legend()
     plt.show()
 

@@ -1,11 +1,11 @@
 #!/usr/bin/python
 
-import smbus
+# import smbus
 import time
 import numpy as np
 import math
-from tst_compass import convert
-# import matplotlib.pyplot as plt
+# from tst_compass import convert
+import matplotlib.pyplot as plt
 
 
 def init_accelero(bus, DEVICE_ADDRESS):
@@ -120,38 +120,36 @@ def process(data_brut, nb_ech, sum_x, sum_y):
     sum_y += y
     mean_x = sum_x/nb_ech
     mean_y = sum_y/nb_ech
-    res = abs(y) + abs(x)
-    value_pass = 4*(abs(mean_x) + abs(mean_y))
+    res = abs(y - mean_y) + abs(x - mean_x)
+    value_pass = (abs(mean_x) + abs(mean_y))
     # value_pass = 300
     print("value = ", res)
     print("value_pass = ", value_pass)
     status = 0
     if res >= value_pass:
         status = 1
-    return status, nb_ech, sum_x, sum_y
+    return res, status, nb_ech, sum_x, sum_y
 
 
-def display_graph(file_name):
+def display_graph(file_name, title):
     X, Y, Z = read_csv(file_name)
     # print(np.mean(X))
     # print(np.mean(Y))
     n = np.arange(0, len(X), 1)
     plt.figure()
-    S = []
+    R = []
     nb_ech, sum_x, sum_y = 0, 0, 0
     for i in range(min(len(X), len(Y))):
-        s, nb_ech, sum_x, sum_y = process(
+        res, status, nb_ech, sum_x, sum_y = process(
             [X[i], Y[i], 0], nb_ech, sum_x, sum_y)
-        S.append(s)
+        R.append(res)
     mean_x, mean_y = sum_x/nb_ech, sum_y/nb_ech
-    print(1.5*mean_x)
-    print(1.5*mean_y)
-    print(1.5*abs(mean_x)+1.5*abs(mean_y))
 
     plt.plot(n, abs(np.array(X)-mean_x), "blue", label="Acc X")
     plt.plot(n, abs(np.array(Y)-mean_y), "green", label="Acc Y")
-    plt.plot(n, S, "magenta", label="abs(X) + abs(Y)")
+    plt.plot(n, R, "magenta", label="abs(X) + abs(Y)")
     # plt.plot(n, Z, "red", label="Acc Z")
+    plt.title(title)
     plt.legend()
     plt.show()
 
@@ -163,21 +161,28 @@ if __name__ == "__main__":
     # write_data(bus, DEVICE_ADDRESS, "data_accelero_filtre.csv")
     file_name = "data_accelero_filtre.csv"
     # display_frequencies(file_name)
-    # display_graph(file_name)
+    display_graph(
+        file_name, "Accelerometer's values mortors off without collisions on dry land")
+    file_name = "data_accelero_filtre_motor_on.csv"
+    display_graph(
+        file_name, "Accelerometer's values mortors on without collisions on dry land")
     # file_name = "data_accelero_filtre_avec_choc.csv"
     # display_frequencies(file_name)
     # display_graph(file_name)
     # file_name = "data_accelero_filtre_avec_choc_5ypos_5yneg_5x.csv"
     # display_graph(file_name)
     file_name = "data_accelero_filtre_piscine.csv"
-    display_graph(file_name)
+    display_graph(
+        file_name, "Accelerometer's values mortors on with collisions in the pool")
     file_name = "data_accelero_filtre_piscine2.csv"
-    display_graph(file_name)
+    display_graph(
+        file_name, "Accelerometer's values mortors on with collisions in the pool")
     file_name = "data_accelero_filtre_piscine3.csv"
-    display_graph(file_name)
+    display_graph(
+        file_name, "Accelerometer's values mortors on with collisions in the pool")
     file_name = "data_accelero_filtre_piscine4.csv"
-    display_graph(file_name)
+    display_graph(
+        file_name, "Accelerometer's values mortors on with collisions in the pool")
     file_name = "data_accelero_filtre_piscine5.csv"
-    display_graph(file_name)
-    # file_name = "data_accelero_filtre_motor_on.csv"
-    # display_graph(file_name)
+    display_graph(
+        file_name, "Accelerometer's values mortors on with collisions in the pool")
