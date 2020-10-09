@@ -42,7 +42,17 @@ def compute_command(e):
     return 50*u
 
 
-def compute_velocity_reg(e, u):
+def retrieve_motor_vit():
+    dt = 0.1
+    posLeft, posRight = read_single_packet()[3], read_single_packet()[4]
+    time.sleep(dt)
+    next_posLeft, next_posRight = read_single_packet()[
+        3], read_single_packet()[4]
+    vLeft, vRight = (next_posLeft-posLeft)/dt, (next_posRight-posRight)/dt
+    return vLeft, vRight
+
+
+def compute_velocity_reg(u):
     """
     Attention manque la conversion increment/vitesse
     Motor regulated by velocity
@@ -50,12 +60,12 @@ def compute_velocity_reg(e, u):
     err_velocity = np.array([[0], [0]])
     posLeft, posRight = read_single_packet()[3], read_single_packet()[
         4]  # output encoder, count nb tic
-    vLeft, vRight = posLeft, posRight  # velocity encoder in nb tic/sec
-    cmdl = u[1, 0]  # command left motor
-    cmdr = u[0, 0]
+    vLeft, vRight = retrieve_motor_vit()  # velocity encoder in nb tic/sec
+    cmdl = u[0, 0]  # command left motor
+    cmdr = u[1, 0]
     # velocity error
-    err_velocity[0, 0] = cmdr - vRight
-    err_velocity[1, 0] = cmdl - vLeft
+    err_velocity[0, 0] = cmdl - vLeft
+    err_velocity[1, 0] = cmdr - vRight
     u_regul = u + err_velocity  # regulation velocity motor
     return u_regul
 
@@ -80,6 +90,7 @@ def turn_around_pool():
     sum_x = 0
     sum_y = 0
     cap0 = np.pi/3
+    u = np.array([[150], [150]])
     while(1):
         print("cap=", retrieve_heading())
         #  output accelerometre
@@ -101,9 +112,10 @@ def turn_around_pool():
             sum_x = 0
             sum_y = 0
         else:
+            u_regul = compute_velocity_reg(u)
             # without choc we keep the same velocity on left and right motor
             ardudrv.send_arduino_cmd_motor(
-                serial_arduino, coef_motor_l*150, 150)  # velocity motor
+                serial_arduino, u_regul[0, 0], u_regul[1, 0])  # velocity motor
 
 
 def turn_left(serial_arduino, vit):
