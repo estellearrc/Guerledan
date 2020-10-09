@@ -44,11 +44,14 @@ def compute_command(e):
 
 def retrieve_motor_vit():
     dt = 0.1
-    posLeft, posRight = read_single_packet()[3], read_single_packet()[4]
+    data = read_single_packet()
+    posLeft, posRight = data[4], data[5]
     time.sleep(dt)
-    next_posLeft, next_posRight = read_single_packet()[
-        3], read_single_packet()[4]
+    data = read_single_packet()
+    next_posLeft, next_posRight = data[4], data[5]
     vLeft, vRight = (next_posLeft-posLeft)/dt, (next_posRight-posRight)/dt
+    print("vLeft=", vLeft)
+    print("vRight=", vRight)
     return vLeft, vRight
 
 
@@ -58,14 +61,15 @@ def compute_velocity_reg(u):
     Motor regulated by velocity
     """
     err_velocity = np.array([[0], [0]])
-    posLeft, posRight = read_single_packet()[3], read_single_packet()[
-        4]  # output encoder, count nb tic
+    data = read_single_packet()
+    posLeft, posRight = data[4], data[5]  # output encoder, count nb tic
     vLeft, vRight = retrieve_motor_vit()  # velocity encoder in nb tic/sec
     cmdl = u[0, 0]  # command left motor
     cmdr = u[1, 0]
     # velocity error
     err_velocity[0, 0] = cmdl - vLeft
     err_velocity[1, 0] = cmdr - vRight
+    print("err", err_velocity)
     u_regul = u + err_velocity  # regulation velocity motor
     return u_regul
 
@@ -90,7 +94,7 @@ def turn_around_pool():
     sum_x = 0
     sum_y = 0
     cap0 = np.pi/3
-    u = np.array([[150], [150]])
+    u = np.array([[25], [25]])
     while(1):
         print("cap=", retrieve_heading())
         #  output accelerometre
@@ -105,7 +109,7 @@ def turn_around_pool():
                 serial_arduino, 0, 0)  # velocity motor
             time.sleep(0.5)
             # Then, we switch on the right motor
-            turn_left(serial_arduino, 150)
+            turn_left(serial_arduino, 25)
             # cap0 = sawtooth(cap0 + np.pi/2)  # cap between -pi and pi
             # follow(serial_arduino, cap0)
             nb_ech = 0
@@ -113,6 +117,7 @@ def turn_around_pool():
             sum_y = 0
         else:
             u_regul = compute_velocity_reg(u)
+            print("u_regul =", u_regul)
             # without choc we keep the same velocity on left and right motor
             ardudrv.send_arduino_cmd_motor(
                 serial_arduino, u_regul[0, 0], u_regul[1, 0])  # velocity motor
