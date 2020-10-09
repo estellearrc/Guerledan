@@ -82,26 +82,25 @@ def turn_around_pool():
     while(1):
         #  output accelerometre
         data_brut_accelero = read_data(bus, ACC_ADDRESS)
-        print("data =", data_brut_accelero)
+        #print("data =", data_brut_accelero)
         data_process, nb_ech, sum_x, sum_y = process(data_brut_accelero, nb_ech,
                                                      sum_x, sum_y)  # data processing
         print("data_process = ", data_process)
         status = test_acceleration(data_process, nb_ech,
                                    sum_x, sum_y)  # status acelero
-        print("status =", status)
+        #print("status =", status)
         timeout = 0.5
         if status == 1:  # if we detect a choc
             # First, we set motors to 0
             data_arduino = ardudrv.get_arduino_status(serial_arduino, timeout)
             ardudrv.send_arduino_cmd_motor(
                 serial_arduino, 0, 0)  # velocity motor
-            # time.sleep(1)
-            # timeout = 4
+            time.sleep(1)
             # Then, we switch on the right motor
             data_arduino = ardudrv.get_arduino_status(serial_arduino, timeout)
             ardudrv.send_arduino_cmd_motor(
-                serial_arduino, 0, 150)  # velocity motor
-            # time.sleep(2)
+                serial_arduino, 0, 50)  # velocity motor
+            time.sleep(2)
             nb_ech = 0
             sum_x = 0
             sum_y = 0
@@ -109,7 +108,7 @@ def turn_around_pool():
             # without choc we keep the same velocity on left and right motor
             data_arduino = ardudrv.get_arduino_status(serial_arduino, timeout)
             ardudrv.send_arduino_cmd_motor(
-                serial_arduino, coef_motor_l*150, 150)  # velocity motor
+                serial_arduino, 50, 50)  # velocity motor
 
 
 def motor_com(cap0):

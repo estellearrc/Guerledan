@@ -74,7 +74,9 @@ def test_acceleration(value, nb_ech, sum_x, sum_y):
     # if three_values[1] >= value_pass_y or three_values[1] <= -value_pass_y:
     #     status[1, 0] = 1 #we dont diff positif or negatif on x, y
 
-    value_pass = 2*(abs(sum_x/nb_ech) + abs(sum_y/nb_ech))
+    value_pass = abs(value - sum_x/nb_ech - sum_y/nb_ech)
+    # value_pass = 300
+
     print("value_pass = ", value_pass)
     status = 0
     if value >= value_pass:
