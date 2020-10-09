@@ -60,7 +60,7 @@ def write_data(bus, DEVICE_ADDRESS, file_name):
     fichier.close()
 
 
-def test_acceleration(sum):
+def test_acceleration(value, nb_ech, sum_x, sum_y):
     """
     Test if the data shown an acceleration
     """
@@ -74,9 +74,10 @@ def test_acceleration(sum):
     # if three_values[1] >= value_pass_y or three_values[1] <= -value_pass_y:
     #     status[1, 0] = 1 #we dont diff positif or negatif on x, y
 
-    value_pass = 450
+    value_pass = 2*(abs(sum_x/nb_ech) + abs(sum_y/nb_ech))
+    print("value_pass = ", value_pass)
     status = 0
-    if sum >= value_pass:
+    if value >= value_pass:
         status = 1
     return status
 
@@ -119,26 +120,42 @@ def correct(x):
     return x
 
 
-def process(data_brut):
+def process(data_brut, nb_ech, sum_x, sum_y):
     x, y, z = data_brut[0], data_brut[1], data_brut[2]
+    nb_ech += 1
+    sum_x += x
+    sum_y += y
+    mean_x = sum_x/nb_ech
+    mean_y = sum_y/nb_ech
+    # print(mean_x)
+    # print(mean_y)
     # x = correct(x)
     # y = correct(y)
     # sum = x**2 + y**2
-    return abs(y)
+    res = abs(y - mean_y) + abs(x - mean_x)
+    return res, nb_ech, sum_x, sum_y
 
 
 def display_graph(file_name):
     X, Y, Z = read_csv(file_name)
-    print(np.mean(X))
-    print(np.mean(Y))
+    # print(np.mean(X))
+    # print(np.mean(Y))
     n = np.arange(0, len(X), 1)
     plt.figure()
     S = []
+    nb_ech, sum_x, sum_y = 0, 0, 0
     for i in range(min(len(X), len(Y))):
-        S.append(process([X[i], Y[i], 0]))
-    plt.plot(n, X, "blue", label="Acc X")
-    plt.plot(n, Y, "green", label="Acc Y")
-    plt.plot(n, S, "magenta", label="X2 + Y2")
+        s, nb_ech, sum_x, sum_y = process(
+            [X[i], Y[i], 0], nb_ech, sum_x, sum_y)
+        S.append(s)
+    mean_x, mean_y = sum_x/nb_ech, sum_y/nb_ech
+    print(1.5*mean_x)
+    print(1.5*mean_y)
+    print(1.5*abs(mean_x)+1.5*abs(mean_y))
+
+    plt.plot(n, abs(np.array(X)-mean_x), "blue", label="Acc X")
+    plt.plot(n, abs(np.array(Y)-mean_y), "green", label="Acc Y")
+    plt.plot(n, S, "magenta", label="abs(X) + abs(Y)")
     # plt.plot(n, Z, "red", label="Acc Z")
     plt.legend()
     plt.show()

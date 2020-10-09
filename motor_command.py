@@ -76,31 +76,40 @@ def turn_around_pool():
     init_accelero(bus, ACC_ADDRESS)
     timeout = 1.0
     coef_motor_l = 1.75
+    nb_ech = 0
+    sum_x = 0
+    sum_y = 0
     while(1):
-        timeout = 2
         #  output accelerometre
         data_brut_accelero = read_data(bus, ACC_ADDRESS)
-        print(data_brut_accelero)
-        data_process = process(data_brut_accelero)  # data processing
-        print(data_process)
-        status = test_acceleration(data_process)  # status acelero
-        print(status)
+        print("data =", data_brut_accelero)
+        data_process, nb_ech, sum_x, sum_y = process(data_brut_accelero, nb_ech,
+                                                     sum_x, sum_y)  # data processing
+        print("data_process = ", data_process)
+        status = test_acceleration(data_process, nb_ech,
+                                   sum_x, sum_y)  # status acelero
+        print("status =", status)
+        timeout = 0.5
         if status == 1:  # if we detect a choc
             # First, we set motors to 0
             data_arduino = ardudrv.get_arduino_status(serial_arduino, timeout)
             ardudrv.send_arduino_cmd_motor(
                 serial_arduino, 0, 0)  # velocity motor
-            time.sleep(1)
-            # Then, we switch on right motor
+            # time.sleep(1)
+            # timeout = 4
+            # Then, we switch on the right motor
             data_arduino = ardudrv.get_arduino_status(serial_arduino, timeout)
             ardudrv.send_arduino_cmd_motor(
-                serial_arduino, 0, 40)  # velocity motor
-            time.sleep(2)
+                serial_arduino, 0, 150)  # velocity motor
+            # time.sleep(2)
+            nb_ech = 0
+            sum_x = 0
+            sum_y = 0
         else:
             # without choc we keep the same velocity on left and right motor
             data_arduino = ardudrv.get_arduino_status(serial_arduino, timeout)
             ardudrv.send_arduino_cmd_motor(
-                serial_arduino, coef_motor_l*40, 40)  # velocity motor
+                serial_arduino, coef_motor_l*150, 150)  # velocity motor
 
 
 def motor_com(cap0):
@@ -108,15 +117,15 @@ def motor_com(cap0):
     Follow cap cap0
     """
     # status messages
-    print("init arduino ...")
-    serial_arduino, data_arduino = ardudrv.init_arduino_line()
-    print("data:", data_arduino[0:-1])
-    print("... done")
-    print("get status ...")
-    timeout = 1.0
-    data_arduino = ardudrv.get_arduino_status(serial_arduino, timeout)
-    print("data:", data_arduino[0:-1])
-    print("... done")
+    # print("init arduino ...")
+    # serial_arduino, data_arduino = ardudrv.init_arduino_line()
+    # print("data:", data_arduino[0:-1])
+    # print("... done")
+    # print("get status ...")
+    # timeout = 1.0
+    # data_arduino = ardudrv.get_arduino_status(serial_arduino, timeout)
+    # print("data:", data_arduino[0:-1])
+    # print("... done")
 
     # motor regulation to follow a given heading
     coef_left_motor = 1.75  # WWARNING : to modif when use fonction u_regul
