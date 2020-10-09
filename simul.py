@@ -22,16 +22,18 @@ def compute_command(e):
     return u
 
 def turn_around_pool():
-    ax=init_figure(-5,60,-5,60)
-    coords_wall = array([[-6,-6],[40,50]])
+    ax = init_figure(-5,60,-5,60)
+    coords_wall = array([[0,0],[40,50]])
     dt = 0.1
-    X= array([[0],[0],[0],[20]])
+    X = array([[1],[1],[0],[20]])
     u = array([[255],[255]]) #motor velocity
     for t in arange(0,10,dt):
         clear(ax)
         draw_box(ax,-5,40,-5,50,"cyan") #draw pool
         if dectection_choc(X,coords_wall):
-            u = array([[0],[0]]) #motor velocity
+            print("Choc mamene !")
+            #u = array([[0],[0]]) #motor velocity
+            X[3,0] = 0
         else:
             u = array([[255],[255]]) #motor velocity
         X = X + dt*f(X,u) 
@@ -40,22 +42,24 @@ def turn_around_pool():
 
 
 def creation_pool(coords_wall):
-    wall_x = []
-    for i in range(coords_wall[0,0],coords_wall[1,0]):
-        wall_x.append(i)
-    wall_y = []
-    for i in range(coords_wall[0,1],coords_wall[1,1]):
-        wall_y.append(i)
-    return wall_y,wall_x
+    size_x = abs(coords_wall[0,0] - coords_wall[1,0])
+    size_y = abs(coords_wall[0,1] - coords_wall[1,1])
+    wall = zeros((size_x,size_y))
+    for i in range(0,size_x):
+        wall[i,0] = 1
+        wall[i,size_y-1] = 1
+    for j in range(0,size_y):
+        wall[0,j] = 1
+        wall[size_x-1,j] = 1
+    return wall
 
 
 def dectection_choc(X,coords_wall):
-    wall_y,wall_x = creation_pool(coords_wall)
-    a = meshgrid(wall_x,wall_y)
-    print(a)
-    if X[0,0] in wall_x:
-        return 1
-    if X[1,0] in wall_y:
+    x1,y1,x2,y2 = coords_wall.flatten()
+    x1,y1,x2,y2 = x1,y1,x2,y2
+    print(x1,x2,y1,y2)
+    posx, posy = X[0,0],X[1,0]
+    if posx >= x2 or posx <= x1 or posy >= y2 or posy <= y1: 
         return 1
     return 0
 
@@ -68,7 +72,10 @@ def simul():
     for t in arange(0,10,dt):
         clear(ax)
         draw_box(ax,-5,40,-5,50,"cyan") #draw pool
-        cap = X[2,0] #Cap réel
+        cap = X[2,0] #Cap ré
+        
+        
+        el
         err = cap0 - cap #error
         u = compute_command(err) #new u         
         X = X + dt*f(X,u) 
