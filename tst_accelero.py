@@ -11,6 +11,7 @@ from tst_compass import convert
 def init_accelero(bus, DEVICE_ADDRESS):
     CTRL1_XL = 0x10
     CTRL2_G = 0x11
+    cap0 = np.pi/3
     CTRL5_C = 0x14
     CTRL6_C = 0x15
     CTRL7_G = 0x16

@@ -7,6 +7,7 @@ import arduino_driver_py3 as ardudrv
 import tst_compass as cmps
 from encoders_driver_py3 import*
 from tst_accelero import *
+from tst_regul_py3 import *
 # from roblib import *
 
 # cmdl = 40
@@ -43,13 +44,16 @@ def compute_command(e):
 
 
 def retrieve_motor_vit():
+    """
+    Calcul of the boat velocity thanks to encoder
+    """
     dt = 0.1
-    data = read_single_packet()
+    data = read_single_packet() #first reading data
     posLeft, posRight = data[4], data[5]
     time.sleep(dt)
-    data = read_single_packet()
+    data = read_single_packet() #seconde reading data
     next_posLeft, next_posRight = data[4], data[5]
-    vLeft, vRight = (next_posLeft-posLeft)/dt, (next_posRight-posRight)/dt
+    vLeft, vRight = (next_posLeft-posLeft)/dt, (next_posRight-posRight)/dt #derivation
     print("vLeft=", vLeft)
     print("vRight=", vRight)
     return vLeft, vRight
@@ -60,16 +64,14 @@ def compute_velocity_reg(u):
     Attention manque la conversion increment/vitesse
     Motor regulated by velocity
     """
-    err_velocity = np.array([[0], [0]])
-    data = read_single_packet()
-    posLeft, posRight = data[4], data[5]  # output encoder, count nb tic
-    vLeft, vRight = retrieve_motor_vit()  # velocity encoder in nb tic/sec
+    err_velocity = np.array([[0], [0]]) 
+    vLeft, vRight = retrieve_motor_vit()  
     cmdl = u[0, 0]  # command left motor
     cmdr = u[1, 0]
     # velocity error
     err_velocity[0, 0] = cmdl - vLeft
     err_velocity[1, 0] = cmdr - vRight
-    print("err", err_velocity)
+    print("err-velocity", err_velocity)
     u_regul = u + err_velocity  # regulation velocity motor
     return u_regul
 
@@ -77,8 +79,11 @@ def compute_velocity_reg(u):
 def compute_heading(Bx, By):
     return np.arctan2(By, Bx)  # + np.pi
 
+def compute_spd(cmd):
+    return 200*cmd/40
 
-def turn_around_pool():
+
+def turn_around_pool(cmd):
     """
     Turn around a pool by a,b,c,d cap
     Trigo sens = turn alway on left
@@ -93,8 +98,9 @@ def turn_around_pool():
     nb_ech = 0
     sum_x = 0
     sum_y = 0
+    cmdl = cmd
+    cmdr = cmd
     cap0 = np.pi/3
-    u = np.array([[25], [25]])
     while(1):
         print("cap=", retrieve_heading())
         #  output accelerometre
@@ -109,18 +115,19 @@ def turn_around_pool():
                 serial_arduino, 0, 0)  # velocity motor
             time.sleep(0.5)
             # Then, we switch on the right motor
-            turn_left(serial_arduino, 25)
+            turn_left(serial_arduino, 150)
             # cap0 = sawtooth(cap0 + np.pi/2)  # cap between -pi and pi
             # follow(serial_arduino, cap0)
             nb_ech = 0
             sum_x = 0
             sum_y = 0
         else:
-            u_regul = compute_velocity_reg(u)
-            print("u_regul =", u_regul)
             # without choc we keep the same velocity on left and right motor
             ardudrv.send_arduino_cmd_motor(
-                serial_arduino, u_regul[0, 0], u_regul[1, 0])  # velocity motor
+                serial_arduino, 1.2*150,150 )  # velocity motor u_regul[1, 0]
+            # spd = compute_spd(cmd)  #velocity
+            # regulation(serial_arduino,spd,cmdl,cmdr)
+
 
 
 def turn_left(serial_arduino, vit):
@@ -219,7 +226,7 @@ if __name__ == "__main__":
     # ardudrv.send_arduino_cmd_motor(serial_arduino, 50, 50)
     # write_data(bus, ACC_ADDRESS,
     #            "data_accelero_filtre_motor_on.csv")
-    turn_around_pool()
+    turn_around_pool(150)
 
 
 """
