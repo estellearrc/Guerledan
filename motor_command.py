@@ -3,12 +3,13 @@
 import time
 import numpy as np
 import sys
-import arduino_driver_py3 as ardudrv
-import tst_compass as cmps
-from encoders_driver_py3 import*
-from tst_accelero import *
-from tst_regul_py3 import *
+# import arduino_driver_py3 as ardudrv
+# import tst_compass as cmps
+# from encoders_driver_py3 import*
+# from tst_accelero import *
+# from tst_regul_py3 import *
 # from roblib import *
+import matplotlib.pyplot as plt
 
 # cmdl = 40
 # cmdr = 40
@@ -39,7 +40,7 @@ def compute_command(e):
     b = np.array([[sawtooth(e)], [1]])
     M_1 = np.linalg.pinv(M)  # resolution of the system
     u = M_1.dot(b)  # command motor array
-    print("u = ", u)
+    # print("u = ", u)
     return 50*u
 
 
@@ -48,12 +49,14 @@ def retrieve_motor_vit():
     Calcul of the boat velocity thanks to encoder
     """
     dt = 0.1
-    data = read_single_packet() #first reading data
+    data = read_single_packet()  # first reading data
     posLeft, posRight = data[4], data[5]
     time.sleep(dt)
-    data = read_single_packet() #seconde reading data
+    data = read_single_packet()  # seconde reading data
     next_posLeft, next_posRight = data[4], data[5]
-    vLeft, vRight = (next_posLeft-posLeft)/dt, (next_posRight-posRight)/dt #derivation
+    dOdoL = abs(delta_odo(next_posLeft, posLeft))
+    dOdoR = abs(delta_odo(next_posRight, posRight))
+    vLeft, vRight = dOdoL/dt, dOdoR/dt  # derivation
     print("vLeft=", vLeft)
     print("vRight=", vRight)
     return vLeft, vRight
@@ -64,20 +67,21 @@ def compute_velocity_reg(u):
     Attention manque la conversion increment/vitesse
     Motor regulated by velocity
     """
-    err_velocity = np.array([[0], [0]]) 
-    vLeft, vRight = retrieve_motor_vit()  
+    err_velocity = np.array([[0], [0]])
+    vLeft, vRight = retrieve_motor_vit()
     cmdl = u[0, 0]  # command left motor
     cmdr = u[1, 0]
     # velocity error
     err_velocity[0, 0] = cmdl - vLeft
     err_velocity[1, 0] = cmdr - vRight
-    print("err-velocity", err_velocity)
+    # print("err-velocity", err_velocity)
     u_regul = u + err_velocity  # regulation velocity motor
     return u_regul
 
 
 def compute_heading(Bx, By):
     return np.arctan2(By, Bx)  # + np.pi
+
 
 def compute_spd(cmd):
     return 200*cmd/40
@@ -115,19 +119,20 @@ def turn_around_pool(cmd):
                 serial_arduino, 0, 0)  # velocity motor
             time.sleep(0.5)
             # Then, we switch on the right motor
-            turn_left(serial_arduino, 150)
-            # cap0 = sawtooth(cap0 + np.pi/2)  # cap between -pi and pi
-            # follow(serial_arduino, cap0)
+            # turn_left(serial_arduino, 150)
+            cap0 = sawtooth(cap0 + np.pi/2)  # cap between -pi and pi
+            follow(cap0, serial_arduino)
             nb_ech = 0
             sum_x = 0
             sum_y = 0
         else:
             # without choc we keep the same velocity on left and right motor
-            ardudrv.send_arduino_cmd_motor(
-                serial_arduino, 1.2*150,150 )  # velocity motor u_regul[1, 0]
+            # ardudrv.send_arduino_cmd_motor(
+            #     serial_arduino, coef_motor_l*50, 50)  # velocity motor u_regul[1, 0]
+            # speed regulation uneffective
             # spd = compute_spd(cmd)  #velocity
             # regulation(serial_arduino,spd,cmdl,cmdr)
-
+            follow(cap0, serial_arduino)
 
 
 def turn_left(serial_arduino, vit):
@@ -159,12 +164,12 @@ def follow(cap0, serial_arduino):
     # print("... done")
 
     # motor regulation to follow a given heading
-    coef_left_motor = 1.75  # WWARNING : to modif when use fonction u_regul
+    coef_left_motor = 1.1  # WWARNING : to modif when use fonction u_regul
     cap = retrieve_heading()
     print("cap = ", cap)
     e = 0.5*(cap-cap0)  # error of heading
     print("error cap =", e)
-    while(abs(e) > 10):
+    while(abs(e) > 0.02):
         cap = retrieve_heading()
         #print("cap = ", cap)
         e = 0.5*(cap-cap0)  # error of heading
@@ -178,7 +183,7 @@ def follow(cap0, serial_arduino):
         ardudrv.send_arduino_cmd_motor(serial_arduino, cmdl, cmdr)
 
 
-def test_motor():
+def test_motor_with_compass():
     print("init arduino ...")
     serial_arduino, data_arduino = ardudrv.init_arduino_line()
     print("data:", data_arduino[0:-1])
@@ -211,10 +216,51 @@ def test_motor():
             ardudrv.send_arduino_cmd_motor(serial_arduino, cmdl, cmdr)
 
 
+def test_motor_speed():
+    print("init arduino ...")
+    serial_arduino, data_arduino = ardudrv.init_arduino_line()
+    print("data:", data_arduino[0:-1])
+    print("... done")
+    print("get status ...")
+    timeout = 1.0
+    data_arduino = ardudrv.get_arduino_cmd_motor(serial_arduino, timeout)
+    print("data:", data_arduino[0:-1])
+    print("... done")
+    cmdl = 50
+    cmdr = 50  # command right motor
+    print("set motors to L=%d R=%d ..." % (cmdl, cmdr))
+    ardudrv.send_arduino_cmd_motor(serial_arduino, cmdl, cmdr)
+    fichier = open("diff_vit_2_motors.csv", "w")
+    for i in np.arange(0, 100, 0.1):
+        vLeft, vRight = retrieve_motor_vit()
+        fichier.write(str(vLeft)+";"+str(vRight)+"\n")
+        time.sleep(0.1)
+    fichier.close()
+
+
+def display_test_motor_speed():
+    vL = []
+    vR = []
+    fichier = open("diff_vit_2_motors.csv", "r")
+    for elt in fichier.readlines():
+        line = elt.strip("\n").split(";")
+        vL.append(int(line[0]))
+        vR.append(int(line[1]))
+    fichier.close()
+    n = np.arange(0, len(vR), 1)
+    plt.figure()
+    plt.plot(n, vR, label="speed right motor (tick/sec), cmdr=50")
+    plt.plot(n, vL, label="speed left motor (tick/sec), cmdr=50")
+    plt.legend()
+    plt.show()
+
+
 if __name__ == "__main__":
     # cap0 = 1.5  # North heading in degrees
     # follow(cap0)
-    # test_motor()
+    # test_motor_speed()
+    display_test_motor_speed()
+
     # # 0 = /dev/i2c-0 (port I2C0), 1 = /dev/i2c-1 (port I2C1)
     # bus = smbus.SMBus(1)
     # # 7 bit address (will be left shifted to add the read write bit)
@@ -226,7 +272,7 @@ if __name__ == "__main__":
     # ardudrv.send_arduino_cmd_motor(serial_arduino, 50, 50)
     # write_data(bus, ACC_ADDRESS,
     #            "data_accelero_filtre_motor_on.csv")
-    turn_around_pool(150)
+    # turn_around_pool(150)
 
 
 """
