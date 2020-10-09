@@ -112,16 +112,6 @@ def display_frequencies(file_name):
     plt.show()
 
 
-def sign(num):
-    return -1 if num < 0 else 1
-
-
-def correct(x):
-    if abs(x) > 0 and abs(x) < 300:
-        x = x - sign(x)*250
-    return x
-
-
 def process(data_brut, nb_ech, sum_x, sum_y):
     x, y, z = data_brut[0], data_brut[1], data_brut[2]
     nb_ech += 1
@@ -129,13 +119,15 @@ def process(data_brut, nb_ech, sum_x, sum_y):
     sum_y += y
     mean_x = sum_x/nb_ech
     mean_y = sum_y/nb_ech
-    # print(mean_x)
-    # print(mean_y)
-    # x = correct(x)
-    # y = correct(y)
-    # sum = x**2 + y**2
-    res = abs(y - mean_y) + abs(x - mean_x)
-    return res, nb_ech, sum_x, sum_y
+    res = abs(y) + abs(x)
+    value_pass = 4*(abs(mean_x) + abs(mean_y))
+    # value_pass = 300
+    print("value = ", res)
+    print("value_pass = ", value_pass)
+    status = 0
+    if res >= value_pass:
+        status = 1
+    return status, nb_ech, sum_x, sum_y
 
 
 def display_graph(file_name):

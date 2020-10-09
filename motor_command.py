@@ -75,43 +75,51 @@ def turn_around_pool():
     bus = smbus.SMBus(1)
     init_accelero(bus, ACC_ADDRESS)
     timeout = 1.0
-    coef_motor_l = 1.75
+    coef_motor_l = 1.1
     nb_ech = 0
     sum_x = 0
     sum_y = 0
+    cap0 = np.pi/3
     while(1):
+        print("cap=", retrieve_heading())
         #  output accelerometre
         data_brut_accelero = read_data(bus, ACC_ADDRESS)
         #print("data =", data_brut_accelero)
-        data_process, nb_ech, sum_x, sum_y = process(data_brut_accelero, nb_ech,
-                                                     sum_x, sum_y)  # data processing
-        print("data_process = ", data_process)
-        status = test_acceleration(data_process, nb_ech,
-                                   sum_x, sum_y)  # status acelero
+        status, nb_ech, sum_x, sum_y = process(data_brut_accelero, nb_ech,
+                                               sum_x, sum_y)  # data processing
         #print("status =", status)
-        timeout = 0.5
         if status == 1:  # if we detect a choc
             # First, we set motors to 0
-            data_arduino = ardudrv.get_arduino_status(serial_arduino, timeout)
             ardudrv.send_arduino_cmd_motor(
                 serial_arduino, 0, 0)  # velocity motor
-            time.sleep(1)
+            time.sleep(0.5)
             # Then, we switch on the right motor
-            data_arduino = ardudrv.get_arduino_status(serial_arduino, timeout)
-            ardudrv.send_arduino_cmd_motor(
-                serial_arduino, 0, 50)  # velocity motor
-            time.sleep(2)
+            turn_left(serial_arduino, 150)
+            # cap0 = sawtooth(cap0 + np.pi/2)  # cap between -pi and pi
+            # follow(serial_arduino, cap0)
             nb_ech = 0
             sum_x = 0
             sum_y = 0
         else:
             # without choc we keep the same velocity on left and right motor
-            data_arduino = ardudrv.get_arduino_status(serial_arduino, timeout)
             ardudrv.send_arduino_cmd_motor(
-                serial_arduino, 50, 50)  # velocity motor
+                serial_arduino, coef_motor_l*150, 150)  # velocity motor
 
 
-def motor_com(cap0):
+def turn_left(serial_arduino, vit):
+    ardudrv.send_arduino_cmd_motor(serial_arduino, 0, vit)  # velocity motor
+    time.sleep(2)
+
+
+def retrieve_heading():
+    Bx, By, Bz = cmps.retrieve_compass_values()  # retrieve brut values
+    coord = cmps.tranform_compass_data(Bx, By, Bz)  # correct brut values
+    Bx, By, Bz = coord[0, 0], coord[1, 0], coord[2, 0]
+    cap = compute_heading(Bx, By)  # compute the wanted heading
+    return cap
+
+
+def follow(cap0, serial_arduino):
     """
     Follow cap cap0
     """
@@ -128,13 +136,12 @@ def motor_com(cap0):
 
     # motor regulation to follow a given heading
     coef_left_motor = 1.75  # WWARNING : to modif when use fonction u_regul
-    while(1):
-        Bx, By, Bz = cmps.retrieve_compass_values()  # retrieve brut values
-        coord = cmps.tranform_compass_data(Bx, By, Bz)  # correct brut values
-        #print("Bx = %d G, By = %d G, Bz = %d G" % (Bx, By, Bz))
-        # print(coord)
-        Bx, By, Bz = coord[0, 0], coord[1, 0], coord[2, 0]
-        cap = compute_heading(Bx, By)  # compute the wanted heading
+    cap = retrieve_heading()
+    print("cap = ", cap)
+    e = 0.5*(cap-cap0)  # error of heading
+    print("error cap =", e)
+    while(abs(e) > 10):
+        cap = retrieve_heading()
         #print("cap = ", cap)
         e = 0.5*(cap-cap0)  # error of heading
         u = np.abs(compute_command(e))
@@ -145,14 +152,6 @@ def motor_com(cap0):
         cmdr = u[1, 0]  # command right motor
         print("set motors to L=%d R=%d ..." % (cmdl, cmdr))
         ardudrv.send_arduino_cmd_motor(serial_arduino, cmdl, cmdr)
-        # print("... done")
-        # data = read_data()  # test choc for tst_accelero
-        # print(data)
-        # print("get decoded data (debug) ...")
-        timeout = 1.0
-        data_arduino = ardudrv.get_arduino_decode_cmd(serial_arduino, timeout)
-        # print("data:", data_arduino[0:-1])
-        # print("... done")
 
 
 def test_motor():
@@ -190,7 +189,7 @@ def test_motor():
 
 if __name__ == "__main__":
     # cap0 = 1.5  # North heading in degrees
-    # motor_com(cap0)
+    # follow(cap0)
     # test_motor()
     # # 0 = /dev/i2c-0 (port I2C0), 1 = /dev/i2c-1 (port I2C1)
     # bus = smbus.SMBus(1)
@@ -223,7 +222,7 @@ while(1):
 """
 Get plot accelero
 # cap0 = 1.5  # North heading in degrees
-    # motor_com(cap0)
+    # follow(cap0)
     # test_motor()
     # 0 = /dev/i2c-0 (port I2C0), 1 = /dev/i2c-1 (port I2C1)
     bus = smbus.SMBus(1)
